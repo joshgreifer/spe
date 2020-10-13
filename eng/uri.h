@@ -7,9 +7,9 @@ namespace sel {
 	public:
 		enum scheme
 		{
-			FILE,	// file:
-			HTTP,	// http:
-			HTTPS,	// https:
+			FILE,		// file:
+			HTTP,		// http:
+			HTTPS,		// https:
 			BLUETOOTH,  // bt:
 			USB,		// usb:
 			PIPE,		// pipe:
@@ -21,51 +21,46 @@ namespace sel {
 			UNK
 		};
 	private:
-
-
 		const char *_path;
 		scheme _scheme;
-
 
 	public:
 
 		uri() = delete;
-
+		uri(char* s) = delete;
 
 		uri(const std::string& s) : uri(s.c_str()) {}
-		
+
 		uri(const char *cstr)
 		{
 			std::string s(cstr);
 			size_t delim_pos = s.find(":");
-			if (delim_pos == std::string::npos)
-				throw eng_ex(format_message("Couldn't parse  uri '%s', looking for \":\"", cstr));
-
-			std::string scheme = s.substr(0, delim_pos);
-			// check for two leading forward slashes
-			delim_pos++;
-			if (cstr[delim_pos++] != '/')
-				throw eng_ex(format_message("Couldn't parse  uri '%s', missing forward slash", cstr, scheme.c_str()));
-			if (cstr[delim_pos++] != '/')
-				throw eng_ex(format_message("Couldn't parse  uri '%s', missing forward slash", cstr, scheme.c_str()));
-
-
-			_path = cstr + delim_pos;
-
-			try {
-				_scheme = scheme_names::get().lookup(scheme);
-
+			if (delim_pos == std::string::npos) {
+				// No scheme, assume FILE
+				_scheme = FILE;
+				_path = cstr;
 			}
-			catch (std::out_of_range&) {
-				throw eng_ex(format_message("Couldn't parse  uri '%s', unknown schema '%s'", cstr, scheme.c_str()));
+			else {
+				std::string scheme = s.substr(0, delim_pos);
+				// check for two leading forward slashes
+				delim_pos++;
+				if (cstr[delim_pos++] != '/')
+					throw eng_ex(format_message("Couldn't parse  uri '%s', missing forward slash", cstr, scheme.c_str()));
+				if (cstr[delim_pos++] != '/')
+					throw eng_ex(format_message("Couldn't parse  uri '%s', missing forward slash", cstr, scheme.c_str()));
 
-				// _scheme = UNK;
+				_path = cstr + delim_pos;
+
+				try {
+					_scheme = scheme_names::get().lookup(scheme);
+				}
+				catch (std::out_of_range&) {
+					throw eng_ex(format_message("Couldn't parse  uri '%s', unknown URI scheme '%s'", cstr, scheme.c_str()));
+
+					// _scheme = UNK;
+				}
 			}
-
 		}
-
-		uri(char *s) = delete;
-
 
 
 	private:

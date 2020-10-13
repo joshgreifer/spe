@@ -1,5 +1,5 @@
 #pragma once
-#include <Eigen/Dense>
+#include <eigen3/Eigen/Dense>
 
 #include "eng_traits.h"
 #include "dictionary.h"

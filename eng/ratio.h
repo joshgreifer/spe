@@ -35,60 +35,47 @@ namespace sel {
 		return ret;
 	}
 
-	template<unsigned int N>struct tPOW10
+	template<class N>N constexpr pow10( N n)
 	{
-		enum { _val = 10 * tPOW10<N - 1>::_val };
-	};
-	template<> struct tPOW10<0>
-	{
-		enum { _val = 1 };
-	};
-
-#ifdef POW10
-#error redefinition of POW10
-#endif
-
-#define POW10(N) ((long long)(tPOW10<N>::_val))
-
+		return n == 0 ? 1 : pow10(n - 1);
+	}
+	
 	/* -----------------------------------------------------------------------------------------------
 	Ratio class.
 	*/
-	template<typename INT_TYPE, typename UINT_TYPE, unsigned int MAX_DIGITS>class RATIO
+	template<typename UINT_TYPE, unsigned int MAX_DIGITS=16>class Ratio
 	{
-		using NUMER_TYPE = INT_TYPE;
-		using DENOM_TYPE = UINT_TYPE;
 
-		using INTMATH_EXCEPTION_DENOM_IS_ZERO = std::exception;
-		using INTMATH_EXCEPTION_ACCURACY_LOST = std::exception;
-		using INTMATH_EXCEPTION_OVERFLOW = std::exception;
+
+
+		//using INTMATH_EXCEPTION_DENOM_IS_ZERO = std::exception;
+		//using INTMATH_EXCEPTION_ACCURACY_LOST = std::exception;
+		//using INTMATH_EXCEPTION_OVERFLOW = std::exception;
 
 
 		static const int MDOVER2 = MAX_DIGITS / 2;
-		static const DENOM_TYPE max_denom = (DENOM_TYPE)POW10(MDOVER2) * POW10(MDOVER2);
-
-		static const DENOM_TYPE DENOM_TYPE_HIGHBIT = (DENOM_TYPE)1 << (sizeof(INT_TYPE) * 8 - 1);
-		static const NUMER_TYPE NUMER_TYPE_MAX = ~DENOM_TYPE_HIGHBIT;
+		static const UINT_TYPE max_denom = (UINT_TYPE)pow10(MDOVER2) * pow10(MDOVER2);
 
 
-		NUMER_TYPE		numer;
-		DENOM_TYPE		denom;
+		UINT_TYPE		numer;
+		UINT_TYPE		denom;
 		mutable	bool	dirty = true;
 
 	public:
 		// constructors
-		RATIO() :
+		Ratio() :
 			numer(0),
 			denom(1),
 			dirty(false)
 		{}
 
-		RATIO(const RATIO &other)
+		Ratio(const Ratio &other)
 		{
 			*this = other;
 		}
 
 
-		RATIO(const NUMER_TYPE n, const DENOM_TYPE d = 1) :
+		Ratio(const UINT_TYPE n, const UINT_TYPE d = 1) :
 			numer(n),
 			denom(d)
 		{
@@ -99,13 +86,13 @@ namespace sel {
 		}
 
 		// Got this one off the net
-		explicit RATIO(const double value)
+		explicit Ratio(const double value)
 		{
 			const double epsilon = 1.0 / max_denom;
 			const unsigned int maxIterations = 1000;
 
 			double r0 = value;
-			NUMER_TYPE a0 = (NUMER_TYPE)r0;
+			UINT_TYPE a0 = (UINT_TYPE)r0;
 
 			// check for (almost) integer arguments, which should not go
 			// to iterations.
@@ -115,18 +102,18 @@ namespace sel {
 				return;
 			}
 
-			NUMER_TYPE p0 = 1;
-			DENOM_TYPE q0 = 0;
-			NUMER_TYPE p1 = a0;
-			DENOM_TYPE q1 = 1;
+			UINT_TYPE p0 = 1;
+			UINT_TYPE q0 = 0;
+			UINT_TYPE p1 = a0;
+			UINT_TYPE q1 = 1;
 
-			NUMER_TYPE p2 = 0;
-			DENOM_TYPE q2 = 1;
+			UINT_TYPE p2 = 0;
+			UINT_TYPE q2 = 1;
 
 			for (unsigned int n = 0; ; ++n) {
 
 				double r1 = 1.0 / (r0 - a0);
-				NUMER_TYPE a1 = (NUMER_TYPE)(r1);
+				UINT_TYPE a1 = (UINT_TYPE)(r1);
 				p2 = (a1 * p1) + p0;
 				q2 = (a1 * q1) + q0;
 
@@ -157,11 +144,11 @@ namespace sel {
 		}
 
 		// reduce to lowest terms, i.e. divide by gcd(numer,denom)
-		inline RATIO reduced()
+		inline Ratio reduced()
 		{
-			RATIO result = *this;
+			Ratio result = *this;
 			if (dirty) {
-				NUMER_TYPE g = sel::gcd(numer, denom);
+				UINT_TYPE g = sel::gcd(numer, denom);
 				if (g > 1) {
 					result.numer /= g;
 					result.denom /= g;
@@ -172,16 +159,16 @@ namespace sel {
 		}
 
 		// accessors
-		inline const NUMER_TYPE n() const { return numer; }
-		inline const DENOM_TYPE d() const { return denom; }
+		inline  auto n() const { return numer; }
+		inline  auto d() const { return denom; }
 
 		// conversion operators
 		operator double() const { return numer / (double)denom; }
 
 		// syntactic sugar for reciprocal
-		inline RATIO operator~() const
+		inline Ratio operator~() const
 		{
-			RATIO timer_(*this);
+			Ratio timer_(*this);
 			timer_.recip();
 			return timer_;
 		}
@@ -189,103 +176,88 @@ namespace sel {
 		// reciprocal (swap numer, denom) - make sure sign bits are correct afterwards
 		inline auto& recip()
 		{
-			if (denom & DENOM_TYPE_HIGHBIT)  // sign bit in denominator needs to be clear
-				throw INTMATH_EXCEPTION_OVERFLOW();
-			NUMER_TYPE temp = (NUMER_TYPE)denom;
-			if (numer < 0) {
-				temp = -temp;
-				denom = (DENOM_TYPE)-numer;
-			}
-			else {
-				denom = (DENOM_TYPE)numer;
-			}
+
+			auto temp = denom;
+	
+			denom = numer;
 			numer = temp;
 			return *this;
 		}
 		// equality
-		inline bool operator==(const RATIO& other) const
+		inline bool operator==(const Ratio& other) const
 		{
 			return this->numer * other.denom == this->denom * other.numer;
 		}
 
-		inline bool operator!=(const RATIO& other) const
+		inline bool operator!=(const Ratio& other) const
 		{
 			return this->numer * other.denom != this->denom * other.numer;
 		}
 
-		RATIO& operator+=(int i) { numer += i * denom; dirty = true; return *this; }
-		RATIO& operator++() { ++numer; dirty = true; return *this; }
-		RATIO operator++(int) const { RATIO temp = this; ++*this; return temp; }
-		RATIO& operator-=(int i) { numer -= i * denom; dirty = true; return *this; }
-		RATIO& operator--() { --numer;  dirty = true; return *this; }
-		RATIO operator--(int) { RATIO temp = this; --*this; return temp; }
+		Ratio& operator+=(UINT_TYPE i) { numer += i * denom; dirty = true; return *this; }
+		Ratio& operator++() { ++numer; dirty = true; return *this; }
+		Ratio operator++(int) const { Ratio temp = this; ++*this; return temp; }
+		Ratio& operator-=(UINT_TYPE i) { numer -= i * denom; dirty = true; return *this; }
+		Ratio& operator--() { --numer;  dirty = true; return *this; }
+		Ratio operator--(int) { Ratio temp = this; --*this; return temp; }
 
-		RATIO& operator*=(int i) { numer *= i; dirty = true; return *this; }
+		Ratio& operator*=(UINT_TYPE i) { numer *= i; dirty = true; return *this; }
 
-		RATIO& operator/=(int i) {
-			bool neg = (i < 0);
-			if (neg)
-				i = -i;
+		Ratio& operator/=(UINT_TYPE i) {
 			denom *= i;
-			if (neg)
-				numer = -numer;
 			dirty = true;
 			return *this;
 		}
 
-		RATIO& operator+=(const RATIO& other) {
+		Ratio& operator+=(const Ratio& other) {
 			dirty = true;
 			numer = numer * other.denom + denom * other.numer;
 			denom = denom * other.denom;
-			if (denom & DENOM_TYPE_HIGHBIT)  // sign bit in denominator needs to be clear
-				throw INTMATH_EXCEPTION_OVERFLOW();
+
 			return *this;
 		}
-		RATIO& operator-=(const RATIO& other) {
+		Ratio& operator-=(const Ratio& other) {
 			dirty = true;
 			numer = numer * other.denom - denom * other.numer;
 			denom = denom * other.denom;
-			if (denom & DENOM_TYPE_HIGHBIT)  // sign bit in denominator needs to be clear
-				throw INTMATH_EXCEPTION_OVERFLOW();
+
 			return *this;
 		}
-		RATIO& operator*=(const RATIO& other) {
+		Ratio& operator*=(const Ratio& other) {
 			dirty = true;
 			numer = numer * other.numer;
 			denom = denom * other.denom;
-			if (denom & DENOM_TYPE_HIGHBIT)  // sign bit in denominator needs to be clear
-				throw INTMATH_EXCEPTION_OVERFLOW();
+
 			return *this;
 		}
-		RATIO& operator/=(const RATIO& other) {
+		Ratio& operator/=(const Ratio& other) {
 			dirty = true;
 			numer = numer * other.denom;
 			denom = denom * other.numer;
-			if (denom & DENOM_TYPE_HIGHBIT)  // sign bit in denominator needs to be clear
-				throw INTMATH_EXCEPTION_OVERFLOW();
+
 			return *this;
 		}
 
-		RATIO operator+(int i) const { RATIO sum = *this; return sum += i; }
-		RATIO operator-(int i) const { RATIO sum = *this; return sum -= i; }
-		RATIO operator*(int i) const { RATIO sum = *this; return sum *= i; }
-		RATIO operator/(int i) const { RATIO sum = *this; return sum /= i; }
+		Ratio operator+(UINT_TYPE i) const { Ratio sum = *this; return sum += i; }
+		Ratio operator-(UINT_TYPE i) const { Ratio sum = *this; return sum -= i; }
+		Ratio operator*(UINT_TYPE i) const { Ratio sum = *this; return sum *= i; }
+		Ratio operator/(UINT_TYPE i) const { Ratio sum = *this; return sum /= i; }
 
-		RATIO operator+(const RATIO& other) const { RATIO sum = *this; return sum += other; }
-		RATIO operator-(const RATIO& other) const { RATIO sum = *this; return sum -= other; }
-		RATIO operator*(const RATIO& other) const { RATIO sum = *this; return sum *= other; }
-		RATIO operator/(const RATIO& other) const { RATIO sum = *this; return sum /= other; }
+		Ratio operator+(const Ratio& other) const { Ratio sum = *this; return sum += other; }
+		Ratio operator-(const Ratio& other) const { Ratio sum = *this; return sum -= other; }
+		Ratio operator*(const Ratio& other) const { Ratio sum = *this; return sum *= other; }
+		Ratio operator/(const Ratio& other) const { Ratio sum = *this; return sum /= other; }
 
 
 		// level:  make denominators equal
-		static inline void level(RATIO& r1, RATIO& r2)
+		static inline void level(Ratio& r1, Ratio& r2)
 		{
 			r1 = r1.reduced();
 			r2 = r2.reduced();
 
-			NUMER_TYPE g = sel::gcd(r1.denom, r2.denom);
-			NUMER_TYPE m1 = r2.denom / g;
-			NUMER_TYPE m2 = r1.denom / g;
+			UINT_TYPE g = sel::gcd(r1.denom, r2.denom);
+			UINT_TYPE m1 = r2.denom / g;
+			UINT_TYPE m2 = r1.denom / g;
 			if (m1 > 1) {
 				r1.numer *= m1;
 				r1.denom *= m1;
@@ -299,15 +271,16 @@ namespace sel {
 
 #include <iostream>
 
-	template<typename INT_TYPE, typename UINT_TYPE, unsigned int MAX_DIGITS> std::ostream& operator<<(std::ostream& os, RATIO<INT_TYPE, UINT_TYPE, MAX_DIGITS>& r)
+	template<typename UINT_TYPE, unsigned int MAX_DIGITS> std::ostream& operator<<(std::ostream& os, Ratio<UINT_TYPE, MAX_DIGITS>& r)
 	{
 		os << r.n() << '/' << r.d();
 		return os;
 	}
 
 	//default numdigits is 8
-	typedef RATIO<int, unsigned int, 8> Ratio8;
-	typedef RATIO<int64_t, uint64_t, 16> Ratio;
+	typedef Ratio<uint32_t, 8> Ratio32;
+	typedef Ratio<uint64_t, 20> Ratio64;
+
 
 
 

@@ -21,6 +21,7 @@
 #include <vector>
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include "eng_traits.h"
 
 /*
 Copyright (c) 2009, Motorola, Inc
@@ -61,7 +62,8 @@ using namespace std;
 #include <stdexcept>
 #include <complex>
 #include <vector>
-#include "ratio.h"
+
+
 
 template<class S1, class S2, class C>
 class Resampler {
@@ -269,7 +271,7 @@ void upfirdn(int upRate, int downRate,
 class resampler_impl
 {
 	const size_t input_size_;
-	const sel::Ratio updown_ratio_;
+	const rate_t updown_ratio_;
 	const int up_factor_;
 	const int dn_factor_;
 	vector<double> coeffs_;
@@ -279,7 +281,7 @@ public:
 	resampler_impl(const size_t inputSize = 0, const size_t input_fs = 1, const size_t output_fs = 1)
 		: 
 		input_size_(inputSize),
-		updown_ratio_(sel::Ratio(input_fs, output_fs).reduced()),
+		updown_ratio_(rate_t(input_fs, output_fs).reduced()),
 		up_factor_(static_cast<const int>(updown_ratio_.n())),
 		dn_factor_(static_cast<const int>(updown_ratio_.d())),
 		ovec_size_(sel::quotient_ceil(input_size_ * up_factor_, dn_factor_))
@@ -346,7 +348,7 @@ private:
 		int kSize = (int)k.size();
 		for (int i = 0; i < kSize; i++)
 			b.push_back(0.0);
-		for (int i = 0; i < freqSize; i += 2) {
+		for (size_t i = 0; i < freqSize; i += 2) {
 			double slope = (amplitude[i + 1] - amplitude[i]) / (freq[i + 1] - freq[i]);
 			double b1 = amplitude[i] - slope * freq[i];
 			if (Nodd == 1) {
@@ -354,7 +356,7 @@ private:
 					slope / 2.0 * (freq[i + 1] * freq[i + 1] - freq[i] * freq[i]) *
 					fabs(weight[(i + 1) / 2] * weight[(i + 1) / 2]);
 			}
-			for (int j = 0; j < kSize; j++) {
+			for (size_t j = 0; j < kSize; j++) {
 				b[j] += (slope / (4 * M_PI * M_PI) *
 					(cos(2 * M_PI * k[j] * freq[i + 1]) - cos(2 * M_PI * k[j] * freq[i])) / (k[j] * k[j])) *
 					fabs(weight[(i + 1) / 2] * weight[(i + 1) / 2]);

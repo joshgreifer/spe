@@ -17,9 +17,11 @@
 
 int main()
 {
+	SEL_RUN_UNIT_TEST(dct)
+	SEL_RUN_UNIT_TEST(numpy)
 	SEL_RUN_UNIT_TEST(fft)
 	SEL_RUN_UNIT_TEST(lattice_filter)
-//	SEL_RUN_UNIT_TEST(periodic_event)
+	// SEL_RUN_UNIT_TEST(periodic_event)
 	SEL_RUN_UNIT_TEST(resampler)
 	SEL_RUN_UNIT_TEST(window)
 	SEL_RUN_UNIT_TEST(quick_queue)
@@ -30,9 +32,10 @@ int main()
 	SEL_RUN_UNIT_TEST(ewma)
 	SEL_RUN_UNIT_TEST(expr)
 	SEL_RUN_UNIT_TEST(lpc)
-	SEL_RUN_UNIT_TEST(mfcc)
+	SEL_RUN_UNIT_TEST(melspec)
 	SEL_RUN_UNIT_TEST(mux_demux)
 	SEL_RUN_UNIT_TEST(psd)
+	//SEL_RUN_UNIT_TEST(mag)
 	SEL_RUN_UNIT_TEST(running_stats)
 
 	return 0;

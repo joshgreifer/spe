@@ -1,9 +1,11 @@
 #pragma once
 #include <stdint.h>
 #include "dictionary.h"
-#include "ratio.h"
+#include "Ratio.h"
 #include <vector>
 #include <initializer_list>
+
+#include "eng_traits.h"
 #include "pugixml.hpp"
 using namespace pugi;
 
@@ -156,7 +158,7 @@ namespace sel {
 			}
 		}
 
-		static void convertarg(const char *value, Ratio& ret)
+		static void convertarg(const char *value, rate_t& ret)
 		{
 			int64_t numer = 0, denom = 0;
 			const char *div = strchr(value, '/');
@@ -165,7 +167,7 @@ namespace sel {
 			else
 				denom = atoll(div + 1);
 			numer = atoll(value);
-			ret = Ratio(numer, denom);
+			ret = rate_t(numer, denom);
 		}
 
 	};

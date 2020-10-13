@@ -44,27 +44,50 @@ namespace {
 #pragma pack(push)
 #pragma pack(1)
 
-	struct CHAR4 {
-		char _c[4];
+	template <size_t Sz, char Pad='\0'> struct CHAR_ARRAY {
+	char c_[Sz];
 
 		bool operator==(const char *s)
 		{
-			return (s[0] == _c[0]) && (s[1] == _c[1]) && (s[2] == _c[2]) && (s[3] == _c[3]);
+			if (!s)
+				return false;
+			size_t i = 0;
+			for (; i < Sz; ++i)
+				if (s[i] != c_[i])
+					return false;
+			// checks strlen(s) == Sz
+			return s[i] == '\0';
 		}
 
 		bool operator!=(const char *s)
 		{
 			return !this->operator==(s);
 		}
+
+		CHAR_ARRAY(const char* s = nullptr) {
+			size_t i = 0;
+			if (s)
+				for (; i < Sz; ++i) {
+					if (s[i] == '\0')
+						break;
+					c_[i] = s[i];
+				}
+					
+			for (; i < Sz; ++i)
+				c_[i] = Pad;
+		}
 	};
+
+	// Riff Id
+	typedef CHAR_ARRAY<4, ' '> RIFFId;
 
 	struct RIFFHeader
 	{
-		CHAR4 IdRIFF; // 'RIFF'
+		RIFFId IdRIFF; // 'RIFF'
 		int szRIFF;
-		CHAR4 RiffFormat;  // 'WAVE' -- means two subchunks, 'fmt ' and 'data'
+		RIFFId RiffFormat;  // 'WAVE' -- means two subchunks, 'fmt ' and 'data'
 
-		CHAR4 IdFmt; // 'fmt '
+		RIFFId IdFmt; // 'fmt '
 		int  szFmt;	// 16, 18 or 40
 		short AudioFormat;
 		short NumChannels;
@@ -72,11 +95,30 @@ namespace {
 		int ByteRate;
 		short BlockAlign;
 		short BitsPerSample;
+
+		RIFFHeader() : IdRIFF("RIFF"),
+		szRIFF(0),
+		RiffFormat("WAVE"),
+		IdFmt("fmt "),
+		szFmt(16),
+		AudioFormat(1),
+		               NumChannels(1),
+		               SampleRate(16000),
+		               ByteRate(0),
+		               BlockAlign(0),
+		               BitsPerSample(16)
+		{
+		}
+
+		explicit RIFFHeader(const char *bytes)
+		{
+			*this = *reinterpret_cast<RIFFHeader *>(const_cast<char *>(bytes));
+		}
 	};
 
 	struct DATAChunk
 	{
-		CHAR4 IdData;  // 'data'
+		RIFFId IdData;  // 'data'
 		int	szData;
 	};
 
@@ -255,7 +297,7 @@ namespace sel {
 					if (numChannels == 1)
 						;					
 					else
-#if SUPPOPTS_STEREO
+#if SUPPORTS_STEREO
 						if (numChannels == 2)
 							;
 						else

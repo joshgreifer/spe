@@ -74,7 +74,6 @@ void run() {
 	input_proc.connect_procs(sig_gen_ramp, resampler.input());
 	output_proc.connect_procs(resampler.output(), logger);
 
-
 //	sel::eng::semaphore sem(ut_traits::iters_to_run, rate_t(48000, 1));
 
 //	sel::eng::schedule input_schedule(&sem, input_proc);
@@ -97,9 +96,7 @@ void run() {
 	printf("\nInput rate\tClaimed: %4.4f\tActual: %4.4f\n", static_cast<double>(input_schedule.expected_rate()), input_rate_actual);
 	printf("Output rate\tClaimed: %4.4f\tActual: %4.4f\n", static_cast<double>(output_schedule.expected_rate()), output_rate_actual * correction);
 
-
 	// Resampler output after 
 	const samp_t *results = logger.in_as_array(0);
-
 }
 SEL_UNIT_TEST_END

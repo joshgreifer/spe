@@ -26,7 +26,7 @@ namespace sel {
 					{
 						if (context->trigger() == owner)
 							throw eng_ex("Mux/Demux input can't triggered by the mux_demux itself.");
-						owner->set_rate(context->expected_rate(), Outw);
+						owner->set_rate(context->expected_rate() / Outw);
 						pimpl_ = std::move(std::make_unique<mux_demux_impl>());
 
 					}

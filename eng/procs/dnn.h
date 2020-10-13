@@ -94,26 +94,28 @@ void run()
 {
 	const std::string onnx_filename = "./dnn_ut.onnx";
 
-	SEL_UNIT_TEST_ASSERT(file_exists(onnx_filename.c_str()));
+	auto file_found = file_exists(onnx_filename.c_str());
+	SEL_UNIT_TEST_ASSERT(file_found);
+	if (file_found) {
+		cv::dnn::Net net(cv::dnn::readNetFromONNX(onnx_filename));
+		std::cout << "[\n";
+		for (auto& layer_name : net.getLayerNames())
+			std::cout << '\t' << layer_name << '\n';
+		std::cout << "]\n";
 
-	cv::dnn::Net net(cv::dnn::readNetFromONNX(onnx_filename));
-	std::cout <<"[\n";
-	for (auto& layer_name : net.getLayerNames())
-		std::cout << '\t' << layer_name << '\n';
-	std::cout <<"]\n";
 
+		sel::eng::proc::dnn<ut_traits::num_input_features, ut_traits::num_output_features> dnn(onnx_filename);
 
-	sel::eng::proc::dnn<ut_traits::num_input_features, ut_traits::num_output_features> dnn(onnx_filename);
+		sel::eng::Const input = input_a;
+		dnn.ConnectFrom(input);
+		dnn.freeze();
 
-	sel::eng::Const input = input_a;
-	dnn.ConnectFrom(input);
-	dnn.freeze();
-
-	dnn.process();
-	const samp_t* matlab_result = matlab_results.data();
-	for (auto& v : dnn.oport)
-	{
-		SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(v, *matlab_result++)
+		dnn.process();
+		const samp_t* matlab_result = matlab_results.data();
+		for (auto& v : dnn.oport)
+		{
+			SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(v, *matlab_result++)
+		}
 	}
 }
 SEL_UNIT_TEST_END

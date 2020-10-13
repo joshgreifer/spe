@@ -2,7 +2,7 @@
 #include <limits>
 #include <complex>
 #include <vector>
-#include "ratio.h"
+#include "Ratio.h"
 
 //using namespace std;
 
@@ -17,6 +17,7 @@ static constexpr samp_t NO_SIGNAL = std::numeric_limits<samp_t>::quiet_NaN();
 #undef free // conflicts with MSVC debug free
 #define exprtk_enable_debugging
 #define exprtk_disable_enhanced_features
+
 #include "exprtk.hpp"
 
 
@@ -25,7 +26,7 @@ typedef exprtk::expression<samp_t>	samp_expression_t;
 typedef exprtk::parser<samp_t>		samp_expr_parser_t;
 typedef exprtk::parser_error::type	samp_expr_parser_error_t;
 
-typedef sel::Ratio rate_t;
+typedef sel::Ratio<size_t, 16> rate_t; 
 
 
 template<size_t WINDOW_SIZE=256, size_t FS=16000>struct eng_traits

@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
-
+// Access to python libs for unit tests
+#include "python.h"
 
 // Unit tests  need to be instantiated
 

@@ -8,19 +8,7 @@
 
 namespace sel {
 
-	template<class Impl>struct connectable_t
-	{
-		template<class Impl2>void connect_to(connectable_t<Impl2>&to)
-		{
-			static_cast<Impl *>(this)->ConnectTo(to);
-		}
 
-		template<class Impl2>void connect_from(connectable_t<Impl2>&from)
-		{
-			static_cast<Impl *>(this)->ConnectFrom(from);
-		}
-
-	};
 
 	struct sp_ex : public std::runtime_error
 	{
@@ -348,7 +336,19 @@ namespace sel {
 
 	//typedef port_t<samp_t>  port;
 
+	template<class Impl>struct connectable_t
+	{
+		template<class Impl2>void connect_to(connectable_t<Impl2>& to, size_t from_port, size_t to_port)
+		{
+			static_cast<Impl*>(this)->ConnectTo(to, from_port, to_port);
+		}
 
+		template<class Impl2>void connect_from(connectable_t<Impl2>& from, size_t from_port, size_t to_port)
+		{
+			static_cast<Impl*>(this)->ConnectFrom(from, from_port, to_port);
+		}
+
+	};
 	/*
 	Subclasses of Connectable will set any required port widths at construction time or even at freeze() time -
 	By default,  the ports  are zero width (i.e. port[n].size() == 0 for all output ports)

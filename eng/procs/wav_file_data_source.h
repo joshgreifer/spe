@@ -168,8 +168,8 @@ namespace sel {
 			{
 
 			private:
-				using file_pointer = FILE * ;
-				file_pointer fp_;
+				using file_descriptor = int;
+				file_descriptor fd_;
 
 				file_input_stream fis;
 
@@ -183,18 +183,18 @@ namespace sel {
 
 				double totDuration;
 
-				file_pointer ParseHeader() {
+				file_descriptor ParseHeader() {
 
 					RIFFHeader header;
 					DATAChunk data;
 
-					file_pointer fp = fopen(filename_, "rb");
+					file_descriptor fd = _open(filename_, O_RDONLY+O_BINARY);
 
 					try {
-						if (nullptr == fp)
+						if (-1 == fd)
 							throw sys_ex();
 
-						if (!fread(&header, 1, sizeof(header), fp))
+						if (!_read(fd, &header, sizeof(header)))
 							throw sys_ex();
 
 
@@ -233,17 +233,17 @@ namespace sel {
 						}
 						else {
 							// scan to end of fmt chunk
-							fseek(fp, header.szFmt - 16, SEEK_CUR);
+							_lseek(fd, header.szFmt - 16, SEEK_CUR);
 						}
 						// repeatedly next chunks into struct, assume it's a data chunk.
 						do {
-							if (!fread(&data, 1, sizeof(data), fp))
+							if (!_read(fd, &data, sizeof(data)))
 								throw sys_ex();
 							if (data.IdData == "data")
 								break;
-							fseek(fp, data.szData, SEEK_CUR); // not 'data', skip chunk
+							_lseek(fd, data.szData, SEEK_CUR); // not 'data', skip chunk
 
-						} while (1); // skip non-data chunks
+						} while (true); // skip non-data chunks
 
 
 
@@ -251,7 +251,7 @@ namespace sel {
 						if (data.IdData != "data")
 							throw eng_ex("WAV File format is incorrect. (Missing 'data' chunk).");
 
-						datastart = ftell(fp);
+						datastart = _tell(fd);
 
 
 						this->totDuration = (8 * (double)data.szData / (header.BitsPerSample * header.NumChannels)) /this->fs_;
@@ -259,11 +259,11 @@ namespace sel {
 					}
 					catch (eng_ex& ex) {
 
-						if (fp) ::fclose(fp);
+						if (fd > 0) ::_close(fd);
 						throw ex;
 					}
 
-					return fp; // return file pointer, pointing at start of data
+					return fd; // return file pointer, pointing at start of data
 				}
 
 			public:
@@ -276,7 +276,7 @@ namespace sel {
 				virtual const std::string type() const override { return "wav file reader"; }
 				wav_file_data_source() : scalar_stream_reader<SAMP16, port_width>(nullptr, rate_t()) {}
 
-				wav_file_data_source(const uri& u) : scalar_stream_reader<SAMP16, port_width>(nullptr, rate_t()),  fp_(0), filename_(nullptr)
+				wav_file_data_source(const uri& u) : scalar_stream_reader<SAMP16, port_width>(nullptr, rate_t()),  fd_(0), filename_(nullptr)
 				{
 
 					u.assert_scheme(uri::FILE);
@@ -290,8 +290,10 @@ namespace sel {
 				void init(schedule* context)  final
 				{
 					this->set_stream(&fis);
-					fis.attach(::fileno(this->fp_));
-
+					this->fd_ = ParseHeader();
+					auto pos = _tell(this->fd_);
+					fis.attach(this->fd_);
+				
 					this->set_rate(rate_t(this->fs_, 1));
 
 					if (numChannels == 1)
@@ -311,7 +313,7 @@ namespace sel {
 				{
 					// Note: Need to parse wave header at freeze() time in order to figure out number of output ports to create
 					// leaves file open if successful otherwise closes file and throws exception
-					this->fp_ = ParseHeader();
+					// this->fd_ = ParseHeader();
 
 
 				}

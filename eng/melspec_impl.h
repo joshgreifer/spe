@@ -65,7 +65,7 @@ public:
 			double coeff = 0;
 
 			for (size_t j = 0; j < spectrum_length; j++)
-				coeff += (inputMagnitudeSpectrum[j] * inputMagnitudeSpectrum[j]) * weights(i,j);
+				coeff += inputMagnitudeSpectrum[j] * weights(i,j);
 
 			outputMelFrequencySpectrum[i] = coeff;
 		}
@@ -93,51 +93,5 @@ private:
 	{
 		return 700.0 * (pow(10.0, mel / 2595.0) - 1.0);
 	}
-	/*
-	void calculate_mel_filter_bank_()
-	{
-		auto maxMel = static_cast<int>(frequency_to_mel_(NyquistFrequency));
-		auto minMel = static_cast<int>(frequency_to_mel_(0.0));
-
-		for (size_t i = 0; i < Nmels; i++)
-		{
-			for (size_t j = 0; j < Nffts; j++)
-				weights(i,j) = 0.0;
-		}
-
-		std::vector<int> centreIndices;
-
-		for (size_t i = 0; i < Nmels + 2; ++i)
-		{
-			double f = i * (maxMel - minMel) / (Nmels + 1.0) + minMel;
-
-			double tmp = log(1 + 1000.0 / 700.0) / 1000.0;
-			tmp = (exp(f * tmp) - 1) / NyquistFrequency;
-			tmp = 0.5 + 700.0 * Nffts * tmp;
-			tmp = floor(tmp);
-
-			int centreIndex = static_cast<int>(tmp);
-			centreIndices.push_back(centreIndex);
-		}
-
-		for (size_t i = 0; i < Nmels; ++i)
-		{
-			int filterBeginIndex = centreIndices[i];
-			int filterCenterIndex = centreIndices[i + 1];
-			int filterEndIndex = centreIndices[i + 2];
-
-			double triangleRangeUp = filterCenterIndex - filterBeginIndex;
-			double triangleRangeDown = filterEndIndex - filterCenterIndex;
-
-			// upward slope
-			for (size_t k = filterBeginIndex; k < filterCenterIndex; k++)
-				weights(i,k) = (k - filterBeginIndex) / triangleRangeUp;
-
-			// downwards slope
-			for (size_t k = filterCenterIndex; k < filterEndIndex; k++)
-				weights(i,k) = (filterEndIndex - k) / triangleRangeDown;
-		}
-
-	}
-	*/
+	
 };

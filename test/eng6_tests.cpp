@@ -35,6 +35,7 @@ int main()
 	SEL_RUN_UNIT_TEST(melspec)
 	SEL_RUN_UNIT_TEST(mux_demux)
 	SEL_RUN_UNIT_TEST(psd)
+	/// TODO:  mag unit test
 	//SEL_RUN_UNIT_TEST(mag)
 	SEL_RUN_UNIT_TEST(running_stats)
 

@@ -20,10 +20,18 @@ namespace sel{
 
 		file_descriptor fd_;
 
+		bool is_eof = false;
+
 	public:
 
 		void beginread(byte *buf, size_t bytes_requested) final
 		{
+			// Don't dispatch any co-routines if eof
+			if (is_eof) {
+				// Call error handler,  which may want to abort on eof
+				std::error_code ec = eng_errc::input_stream_eof;
+				this->on_error(ec);
+			}
 			int bytes_transferred = ::read(fd_, buf, (unsigned int)bytes_requested);
 
 			if (bytes_transferred < 0) {
@@ -31,16 +39,19 @@ namespace sel{
 				this->on_error(ec);
 
 			}
-			else if (bytes_transferred == 0) { // EOF
-				std::error_code ec = eng_errc::input_stream_eof;
-				this->on_error(ec);
-
-			}
 			else {
-				// simulate async read by dispatching call back
+				if (bytes_transferred == 0) { // EOF
+					this->is_eof = true;
+
+				}
+
+				// Simulate async read by dispatching, rather than calling, read completion co-routine.
+				// Note, we do this even if bytes_transferred == 0.
+				// If a reader subsequently triggers another beginread(),
+				// this->is_eof will be set, and no more read handlers will be dispatched.
 				scheduler::get().queue_work_item([this, bytes_transferred] {
 					this->endread(bytes_transferred);
-				});
+					});
 			}
 
 		}
@@ -62,7 +73,8 @@ namespace sel{
 
 		std_ec attach(file_descriptor fd)
 		{
-			fd_ = ::dup(fd);
+			fd_ = fd;
+			auto pos =  _tell(fd_);
 			this->on_connected();
 
 
@@ -70,8 +82,8 @@ namespace sel{
 		}
 
 		std_ec disconnect() final {
-			::close(fd_);
-			fd_ = 0;
+			::_close(fd_);
+			fd_ = -1;
 			return std_ec(errno, std::system_category());
 		}
 

@@ -123,7 +123,7 @@ namespace sel {
 				timer_.async_wait([this](const boost::system::error_code& /*e*/) {
 					reset();
 					raise();
-//					std::cerr << "\n< Reschedule callback: Semaphore count " << this->trigger_ << "\tasio_timer expiry " << std::chrono::time_point_cast<std::chrono::seconds>(timer_.expiry()).time_since_epoch().count();
+					//std::cerr << "\n< Reschedule callback: Semaphore count " << this->count() << "\tasio_timer expiry " << std::chrono::time_point_cast<std::chrono::seconds>(timer_.expiry()).time_since_epoch().count();
 					timer_.expires_at(timer_.expiry() + period_ns_);
 					reschedule();
 
@@ -325,23 +325,40 @@ namespace sel {
 					while (!stop_request) {
 						// wait for a user event
 						// Pending async routines may release (raise) semaphores, run one now
-						service_any_pending_aio();
+						
 						// Run all ready schedules;
 
-						step();
+						try {
+							step();
+							service_any_pending_aio();
+							
+						} catch (std::error_code &ec) {
+							std::cerr << "Scheduler stopped.  Reason: " << ec.message() << std::endl;
+							if (ec == eng_errc::input_stream_eof)
+								stop_request = true;
+							else
+								throw;
+						}
+	
+
+						
 
 					}
 				}
+				catch (std::error_code&  ec) {
+					std::cerr << "Scheduler error: " << ec.message() << std::endl;
+
+				}
 				catch (eng_ex& handled_error) {
-					std::cerr << "Scheduler stopped due to error: " << handled_error.what() << std::endl;
+					std::cerr << "Scheduler error: " << handled_error.what() << std::endl;
 
 				}
 				catch (std::exception& unhandled_error) {
-					std::cerr << "Scheduler stopped due to unhandled error: " << unhandled_error.what() << std::endl;
+					std::cerr << "Scheduler unhandled error: " << unhandled_error.what() << std::endl;
 
 				}
 				catch (...) {
-					std::cerr << "Scheduler stopped due to unexpected error." << std::endl;
+					std::cerr << "Scheduler unhandled error." << std::endl;
 				}
 
 				// If any schedule actions are processors, run their term() routines

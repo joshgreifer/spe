@@ -10,10 +10,10 @@ namespace sel {
 		namespace proc {
 			// resampler
 			template<class traits=eng_traits<>, size_t OutputFs= traits::input_fs, size_t InW = traits::input_frame_size, size_t OutW=InW>class resampler :
-				public semaphore, virtual public creatable<resampler<traits>>
+				public data_source<OutW>, virtual public creatable<resampler<traits>>
 			{
 				using fifo = quick_queue<samp_t>;
-				std::unique_ptr<fifo> pfifo_ = 0;
+				std::unique_ptr<fifo> pfifo_ = nullptr;
 
 				// At init time, this is set by the output processor
 				schedule *output_context = nullptr;
@@ -64,24 +64,21 @@ namespace sel {
 					}
 				} input_;
 
-				struct resampler_out_proc_t : Processor01A<OutW>
+
+			
+				void init(schedule *context) final 
 				{
-					resampler *owner;
-					explicit resampler_out_proc_t(resampler *m) : owner(m) {}
+					if (context->trigger() != this)
+						throw eng_ex("Resampler output must be triggered by the resampler itself.");
+					this->output_context = context;
+				}
 
-					void init(schedule *context) final 
-					{
-						if (context->trigger() != owner)
-							throw eng_ex("Resampler output must be triggered by the resampler itself.");
-						owner->output_context = context;
-					}
+				void process() final
+				{
+					this->pfifo_->atomicread_into(this->oport);
+				}
 
-					void process() final
-					{
-						owner->pfifo_->atomicread_into(this->oport);
-					}
-
-				} output_;
+	
 
 
 			public:
@@ -90,11 +87,11 @@ namespace sel {
 
 //				virtual const std::string type() const override { return "resampler"; }
 
-				resampler_in_proc_t & input() { return input_; }
-				resampler_out_proc_t & output() { return output_; }
 
+				ConnectableProcessor& input() final { return input_; }
+				
 				// default constuctor needed for factory creation
-				explicit resampler() : semaphore(0, rate_t(OutputFs, 1)), input_(this), output_(this)
+				explicit resampler() : data_source(rate_t(OutputFs, 1)), input_(this)
 				{
 					
 				}

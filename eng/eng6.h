@@ -14,6 +14,7 @@
 #include "procs/compound_processor.h"
 #include "procs/wav_file_data_source.h"
 #include "procs/matlab_file_output.h"
+#include "procs/numpy_file_writer.h"
 #include "procs/mux_demux.h"
 #include "procs/resampler.h"
 

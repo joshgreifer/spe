@@ -74,8 +74,16 @@ namespace sel {
 			size_t num_buffers_avail = ibuf_.get_avail() / (OUTW * sizeof(number_t));
 			if (num_buffers_avail)
 				this->raise(num_buffers_avail);
-			else //  keep reading until num_buffers_avail >= 1
-				istream_->beginread(ibuf_.acquirewrite(), ibuf_.put_avail());
+			else { 
+				if (nbytes_read == 0) {
+					const auto pad_value = (number_t)0;
+					for (size_t i = 0; i < OUTW * sizeof(number_t); ++i)
+						ibuf_.put(pad_value);
+					this->raise();
+				} else //  keep reading until num_buffers_avail >= 1
+					istream_->beginread(ibuf_.acquirewrite(), ibuf_.put_avail());
+			} 
+
 
 //			std::cout << "(on_data) raised: " << num_buffers_avail << "\n";
 

@@ -189,20 +189,20 @@ namespace sel
 
 				//}
 
-				void add_proc(ConnectableProcessor& proc) { add_node(proc); }
-				void add_proc(processor_dag& proc) { add_node(proc); }
+				//void add_proc(ConnectableProcessor& proc) { add_node(proc); }
+				//void add_proc(processor_dag& proc) { add_node(proc); }
 
 				// connect constant value to dynamic processor, don't need to add the edge to dag 
 				// i.e. there's no process() method in a const so no processor sequence dependency
 				void connect_const(Const &from, ConnectableProcessor& to, size_t from_port = PORTID_DEFAULT, size_t to_port = PORTID_DEFAULT) {
-					add_node(to);
-					from.ConnectTo(to, from_port, to_port);
+					add_node(to.input());
+					from.ConnectTo(to.input(), from_port, to_port);
 				}
 
 				void connect_procs(ConnectableProcessor& from, ConnectableProcessor& to, size_t from_port = PORTID_DEFAULT, size_t to_port = PORTID_DEFAULT)
 				{
-					add_edge(from, to);
-					from.ConnectTo(to, from_port, to_port);
+					add_edge(from.output(), to.input());
+					from.output().ConnectTo(to.input(), from_port, to_port);
 				}				
 			};
 
@@ -212,20 +212,63 @@ namespace sel
 			 */
 			class processor_graph 
 			{
-				std::vector<processor_dag> fibers_;
-				using fiber=processor_dag;
+
+				using fiber=compound_processor;
+				std::map<semaphore*, fiber*> sem_map;
+
+				using proc_or_const = Connectable<samp_t>;
+				using proc = ConnectableProcessor;
+				std::map<proc_or_const*, fiber*> proc_map;
+				scheduler& s_;
 			public:
 
-				processor_graph() = default;
+				processor_graph(scheduler& s = scheduler::get()) : s_(s) {}
 
-				void connect(Connectable<samp_t>& from, Connectable<samp_t>& to)
+				void connect(proc_or_const& from, proc& to)
 				{
 					// if 'from' is rate-triggering, create a new fiber,  and do new_fiber.connect_procs()  
 					// if 'from' is not rate-triggering,  find the fiber containing it.  If found, fiber_containing_from.connect_procs() 
 					//		if not found, look for 'to' proc,  and do fiber_containing_to.connect_procs()  
 					//			if *still* not found, create a new fiber,  and do new_fiber.connect_procs()  
-					
+					auto sem = dynamic_cast<semaphore*>(&from);
+					fiber* fib = nullptr;
+					if (sem)  // 'from' is rate-triggering
+					{
+						fib = sem_map[sem];
+						if (!fib) {
+							fib = sem_map[sem] = new fiber;
+							// create a new schedule
+							s_.add(sem, *fib);
+						}
+						// 'to' belongs to same fiber as 'from'
+						
+						proc_map[&to] = fib;
+						
+					} else // 'from' is not rate-triggering, get its fiber
+					{
+						fib = proc_map[&from];
+						if (!fib) // no fiber, see if 'to''s fiber is registered
+						{
+							fib = proc_map[&to];
+							if (!fib) // 'to' is not registered either, create a new fiber for it
+							{
+								fib = new fiber;
+								
+							}
+							proc_map[&from] = fib; // register fiber
+						}
 
+
+					}
+					proc_map[&to] = fib;
+
+					// now fib == a valid fiber.  Do the connection
+					const auto const_from = dynamic_cast<Const*>(&from);
+					const auto proc_from = dynamic_cast<ConnectableProcessor*>(&from);
+					if (const_from)
+						fib->connect_const(*const_from, to);
+					else 
+						fib->connect_procs(*proc_from, to);
 				}
 			};
 

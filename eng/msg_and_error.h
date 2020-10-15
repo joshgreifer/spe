@@ -181,7 +181,7 @@ struct sys_ex : public eng_ex
 enum class eng_errc
 {
 	// no 0
-	input_stream_eof = 10, // requested airport doesn't exist
+	input_stream_eof = 10, // End of file
 };
 
 //std::error_code make_error_code(eng_errc);

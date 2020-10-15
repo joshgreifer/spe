@@ -19,8 +19,9 @@ namespace sel {
 			virtual void on_stream_connected(input_stream& s) = 0;
 			virtual void on_stream_data_recv_complete(input_stream& s, const size_t nbytes) = 0;
 
-			virtual void on_error(bytestream& s, std::error_code& ec) {
-				std::cerr << "Error reading stream: " << ec.message() << std::endl;
+			virtual void on_error(bytestream& s, std::error_code& ec) throw(...) {
+				throw ec;
+				// std::cerr << "Error reading stream: " << ec.message() << std::endl;
 			}
 
 		};

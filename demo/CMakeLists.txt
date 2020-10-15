@@ -13,7 +13,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
 # add the executable
 add_executable(demo demo.cpp)
-
+file(COPY test_audio_16k_i16.wav DESTINATION .)
 
 target_link_libraries( demo PRIVATE opencv_dnn opencv_core )
-

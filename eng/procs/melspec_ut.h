@@ -22,7 +22,7 @@ SEL_UNIT_TEST(melspec)
 struct ut_traits
 {
 	static constexpr size_t n_filters = 80;
-	static constexpr size_t n_coeffs = 80;
+	static constexpr size_t n_mels = 80;
 	static constexpr size_t input_frame_size = 1024;
 	static constexpr size_t input_fs = 16000;
 	static constexpr size_t overlap = 768;
@@ -64,7 +64,7 @@ void run() {
 void run_old() {
 
 
-	hammingwindow window1;
+	hamming_window window1;
 	fft fft1;
 	mag mag1;
 	melspec melspec1;

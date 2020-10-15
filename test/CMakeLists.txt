@@ -24,5 +24,6 @@ endif()
 add_executable(spe_test eng6_tests.cpp)
 
 file(COPY artefacts/dnn_ut.onnx DESTINATION .)
+file(COPY artefacts/test_audio_16k_i16.wav DESTINATION .)
 
 target_link_libraries( spe_test PRIVATE opencv_dnn opencv_core pybind11::embed pybind11::module pybind11::pybind11)

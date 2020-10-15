@@ -3,6 +3,7 @@
 
 // window unit test
 #include "window.h"
+#include "wav_file_data_source.h"
 #include "compound_processor.h"
 #include "../scheduler.h"
 #include "../unit_test.h"
@@ -24,6 +25,15 @@ struct ut_traits_overlap
 	static constexpr size_t input_fs = 16000;
 };
 
+struct ut_traits
+{
+	static constexpr size_t input_fs = 16000;
+	static constexpr size_t output_fs = 16000;
+	static constexpr size_t input_frame_size = 1024;
+	static constexpr size_t hop_size = 256;
+	static constexpr size_t overlap = input_frame_size - hop_size;
+
+};
 struct sig_gen_ramp : sel::eng::Processor01A<ut_traits_overlap::input_frame_size>
 {
 	size_t c = 0;
@@ -34,10 +44,12 @@ struct sig_gen_ramp : sel::eng::Processor01A<ut_traits_overlap::input_frame_size
 	}
 } sig_gen_ramp;
 
-using kaiserwindow = sel::eng::proc::window_t<ut_traits_no_overlap, sel::eng::proc::wintype::KAISER<ut_traits_no_overlap>, ut_traits_no_overlap::input_frame_size>;
-using hammingwindow = sel::eng::proc::window_t<ut_traits_no_overlap, sel::eng::proc::wintype::HAMMING<ut_traits_no_overlap>, ut_traits_no_overlap::input_frame_size>;
-using rectangularwindow = sel::eng::proc::window_t<ut_traits_overlap, sel::eng::proc::wintype::RECTANGULAR<ut_traits_overlap>, ut_traits_overlap::input_frame_size>;
+using kaiser_window = sel::eng::proc::window_t<ut_traits_no_overlap, sel::eng::proc::wintype::KAISER<ut_traits_no_overlap>, ut_traits_no_overlap::input_frame_size>;
+using hamming_window = sel::eng::proc::window_t<ut_traits_no_overlap, sel::eng::proc::wintype::HAMMING<ut_traits_no_overlap>, ut_traits_no_overlap::input_frame_size>;
+using rectangular_window = sel::eng::proc::window_t<ut_traits_overlap, sel::eng::proc::wintype::RECTANGULAR<ut_traits_overlap>, ut_traits_overlap::input_frame_size>;
+using hann_window = sel::eng::proc::window_t<ut_traits, sel::eng::proc::wintype::HANN<ut_traits>, ut_traits::input_frame_size>;
 
+using wav_reader = sel::eng::proc::wav_file_data_source<ut_traits::input_frame_size>;
 
 sel::eng::Const input = std::vector<double>(ut_traits_no_overlap::input_frame_size, 1.0);
 static constexpr size_t N = ut_traits_no_overlap::input_frame_size;
@@ -68,7 +80,7 @@ std::array<samp_t, N> matlab_kaiser_result = { {
 
 void run() {
 
-	hammingwindow hamming_window;
+	hamming_window hamming_window;
 	hamming_window.ConnectFrom(input);
 	hamming_window.freeze();
 	hamming_window.process();
@@ -83,7 +95,7 @@ void run() {
 
 	}
 
-	kaiserwindow kaiser_window;
+	kaiser_window kaiser_window;
 	kaiser_window.ConnectFrom(input);
 	kaiser_window.freeze();
 	kaiser_window.process();
@@ -105,7 +117,7 @@ void run() {
 		void process() final {}
 	} logger;
 
-	rectangularwindow rectangular_window;
+	rectangular_window rectangular_window;
 	const auto input_rate = rate_t(ut_traits_overlap::input_fs, ut_traits_overlap::input_frame_size);
 	sel::eng::semaphore sem(0, input_rate);
 	
@@ -125,19 +137,19 @@ void run() {
 	s.add(output_schedule);
 	s.init();
 
-	static constexpr auto stride = ut_traits_overlap::input_frame_size - ut_traits_overlap::overlap;
+	static constexpr auto hop_length = ut_traits_overlap::input_frame_size - ut_traits_overlap::overlap;
 
-	const rate_t overlap_factor(ut_traits_overlap::input_frame_size, stride);
+	const rate_t overlap_factor(ut_traits_overlap::input_frame_size, hop_length);
 
 	SEL_UNIT_TEST_ASSERT(output_schedule.expected_rate() == input_rate * overlap_factor);
 
 	while (s.step()) {
 		
-		for (auto v:  rectangular_window.output().oport)
+		for (auto v:  rectangular_window.oport)
 			std::cerr << v << ' ';
 		std::cerr << std::endl;
 		
-		SEL_UNIT_TEST_ASSERT(static_cast<size_t>(rectangular_window.output().out[0] + 0.5) % stride == 0);
+		SEL_UNIT_TEST_ASSERT(static_cast<size_t>(rectangular_window.out[0] + 0.5) % hop_length == 0);
 	}
 
 

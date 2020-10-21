@@ -1,10 +1,10 @@
 #pragma once
-#include "../eng_traits.h"
-#include "../processor.h"
+#include "../../eng/eng_traits.h"
+#include "../new_processor.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
 namespace sel {
-	namespace eng {
+	namespace eng7 {
 		namespace proc {
 
 
@@ -62,7 +62,7 @@ namespace sel {
 					template<size_t Winsize = traits::input_frame_size>static void process_buffer(const samp_t* in, samp_t* out)
 					{
 						for (size_t i = 0; i < Winsize; ++i)
-							out[i] = in[i] * (0.54 - 0.46 * cos((2.0 * M_PI * i) / (Winsize - 1)));
+							out[i] = in[i] * 0.54 - 0.46 * cos((2.0 * M_PI * i) / (Winsize - 1));
 
 					}
 					static const char* name() { return "hamming_window"; }
@@ -72,7 +72,7 @@ namespace sel {
 					template<size_t Winsize = traits::input_frame_size>static void process_buffer(const samp_t* in, samp_t* out)
 					{
 						for (size_t i = 0; i < Winsize; ++i)
-							out[i] = in[i] * (0.5 - 0.5 * cos((2.0 * M_PI * i) / (Winsize - 1)));
+							out[i] = in[i] * 0.5 - 0.5 * cos((2.0 * M_PI * i) / (Winsize - 1));
 
 					}
 					static const char* name() { return "hann_window"; }

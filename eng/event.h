@@ -1,4 +1,5 @@
 #pragma once
+#include "object.h"
 #include "eng_traits.h"
 #include "rate_measure.h"
 

@@ -124,8 +124,8 @@ void run() {
 	sel::eng::proc::compound_processor input_proc;
 	sel::eng::proc::compound_processor output_proc;
 
-	input_proc.connect_procs(sig_gen_ramp, rectangular_window.input());
-	output_proc.connect_procs(rectangular_window.output(), logger);
+	input_proc.connect_procs(sig_gen_ramp, rectangular_window.input_proc());
+	output_proc.connect_procs(rectangular_window.output_proc(), logger);
 
 
 	sel::eng::scheduler s = {};

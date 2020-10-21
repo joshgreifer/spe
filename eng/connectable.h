@@ -338,15 +338,15 @@ namespace sel {
 
 	template<class Impl>struct connectable_t
 	{
-		template<class Impl2>void connect_to(connectable_t<Impl2>& to, size_t from_port, size_t to_port)
-		{
-			static_cast<Impl*>(this)->ConnectTo(to, from_port, to_port);
-		}
+		//template<class Impl2>void connect_to(connectable_t<Impl2>& to, size_t from_port, size_t to_port)
+		//{
+		//	static_cast<Impl*>(this)->ConnectTo(to, from_port, to_port);
+		//}
 
-		template<class Impl2>void connect_from(connectable_t<Impl2>& from, size_t from_port, size_t to_port)
-		{
-			static_cast<Impl*>(this)->ConnectFrom(from, from_port, to_port);
-		}
+		//template<class Impl2>void connect_from(connectable_t<Impl2>& from, size_t from_port, size_t to_port)
+		//{
+		//	static_cast<Impl*>(this)->ConnectFrom(from, from_port, to_port);
+		//}
 
 	};
 	/*

@@ -195,14 +195,14 @@ namespace sel
 				// connect constant value to dynamic processor, don't need to add the edge to dag 
 				// i.e. there's no process() method in a const so no processor sequence dependency
 				void connect_const(Const &from, ConnectableProcessor& to, size_t from_port = PORTID_DEFAULT, size_t to_port = PORTID_DEFAULT) {
-					add_node(to.input());
-					from.ConnectTo(to.input(), from_port, to_port);
+					add_node(to.input_proc());
+					from.ConnectTo(to.input_proc(), from_port, to_port);
 				}
 
 				void connect_procs(ConnectableProcessor& from, ConnectableProcessor& to, size_t from_port = PORTID_DEFAULT, size_t to_port = PORTID_DEFAULT)
 				{
-					add_edge(from.output(), to.input());
-					from.output().ConnectTo(to.input(), from_port, to_port);
+					add_edge(from.output_proc(), to.input_proc());
+					from.output_proc().ConnectTo(to.input_proc(), from_port, to_port);
 				}				
 			};
 

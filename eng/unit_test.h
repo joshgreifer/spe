@@ -1,5 +1,7 @@
 #pragma once
 #include <iostream>
+#include <exception>
+
 // Access to python libs for unit tests
 #include "python.h"
 
@@ -16,7 +18,9 @@ namespace  TEST_NAME ## _ut { \
 		test() \
 		{ \
 			std::cout << "UNIT TEST: " << #TEST_NAME << ": "; \
+			try { \
 			run(); \
+			} catch(std::exception &ex) { std::cout << ex.what(); } \
 			printf("Passed: %d Failed: %d\n\n", npassed, nfailed); \
 		}
 
@@ -24,6 +28,9 @@ namespace  TEST_NAME ## _ut { \
 	} \
 	; \
 } // unit_test
+void SEL_UNIT_TEST_ITEM(const char* msg) {
+	printf("\n* SUBTEST: %s\n", msg);
+}
 
 #define SEL_UNIT_TEST_ASSERT(EXPR) if (EXPR) { ++npassed; } else { printf("\n\n>>>>>>>>>> ASSERT FAILED: (%s:%d) %s\n\n", __FILE__, __LINE__, #EXPR); ++nfailed; }
 

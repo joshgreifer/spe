@@ -9,11 +9,11 @@ namespace sel {
 
 			template<class traits, size_t SZ = traits::input_frame_size>
 			class mag :
-			public Processor1A1B<2 * SZ, SZ / 2 + 1>,
+			public Processor1A1B<2 * SZ, SZ>,
 			virtual public creatable<mag<traits, SZ> >
 			{
 				// input is an fft
-				static constexpr size_t OUTW = SZ / 2 + 1;
+				static constexpr size_t OUTW = SZ;
 			public:
 				const std::string type() const final { return "magnitude"; }
 

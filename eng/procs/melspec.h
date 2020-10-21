@@ -10,7 +10,7 @@ namespace sel {
 		namespace proc {
 
 			template<class traits> class melspec :
-				public  Processor1A1B<traits::input_frame_size / 2 + 1, traits::n_mels>, virtual public creatable<melspec<traits>>
+				public  Processor1A1B<traits::input_frame_size, traits::n_mels>, virtual public creatable<melspec<traits>>
 			{
 				
 			private:

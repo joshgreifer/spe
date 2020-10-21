@@ -71,8 +71,8 @@ void run() {
 	sel::eng::proc::compound_processor output_proc;
 
 
-	input_proc.connect_procs(sig_gen_ramp, resampler.input());
-	output_proc.connect_procs(resampler.output(), logger);
+	input_proc.connect_procs(sig_gen_ramp, resampler.input_proc());
+	output_proc.connect_procs(resampler.output_proc(), logger);
 
 //	sel::eng::semaphore sem(ut_traits::iters_to_run, rate_t(48000, 1));
 

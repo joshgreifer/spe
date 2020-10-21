@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.14)
 
 # set the project name
 project(spe)
@@ -18,12 +18,20 @@ message(STATUS "Found pybind11 v${pybind11_VERSION}: ${pybind11_INCLUDE_DIRS} ${
 message(STATUS "Found Python ${PYTHON_LIBRARY_SUFFIX} in: ${PYTHON_PREFIX}: ${PYTHON_INCLUDE_DIRS} ${PYTHON_LIBRARIES} ${PYTHON_SITE_PACKAGES}")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-	add_compile_options(/bigobj)
+	add_compile_options(/bigobj /std:c++17)
 endif()
 # add the executable
-add_executable(spe_test eng6_tests.cpp)
+
+add_executable(spe_test6 eng6_tests.cpp)
+add_executable(spe_test7 eng7_tests.cpp)
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+	set_property(TARGET spe_test7 PROPERTY CXX_STANDARD 17)
+	set_property(TARGET spe_test7 PROPERTY CXX_STANDARD_REQUIRED ON)
+endif()
 
 file(COPY artefacts/dnn_ut.onnx DESTINATION .)
 file(COPY artefacts/test_audio_16k_i16.wav DESTINATION .)
 
-target_link_libraries( spe_test PRIVATE opencv_dnn opencv_core pybind11::embed pybind11::module pybind11::pybind11)
+target_link_libraries( spe_test6 PRIVATE opencv_dnn opencv_core pybind11::embed pybind11::module pybind11::pybind11)
+target_link_libraries( spe_test7 PRIVATE opencv_dnn opencv_core pybind11::embed pybind11::module pybind11::pybind11)

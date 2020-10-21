@@ -52,9 +52,9 @@ int main_old(int argc, const char *argv[])
 	sel::eng::proc::numpy_file_writer<demo_traits::input_frame_size / 2 + 1> numpy_writer_mag("test_audio_16k_i16.mag.npy");
 	sel::eng::proc::numpy_file_writer<demo_traits::input_frame_size> numpy_writer_frames("test_audio_16k_i16.frames.npy");
 
-	auto& win_out = window.output();
-	input_proc.connect_procs(wav_reader, window.input());
-	output_proc.connect_procs(window.output(), fft);
+	auto& win_out = window.output_proc();
+	input_proc.connect_procs(wav_reader, window.input_proc());
+	output_proc.connect_procs(window.output_proc(), fft);
 	output_proc.connect_procs(fft, mag);
 	output_proc.connect_procs(mag, mel);
 	

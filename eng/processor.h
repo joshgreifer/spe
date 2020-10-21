@@ -29,11 +29,12 @@ namespace sel {
 			virtual ~processor() {}
 		};
 
+
 		struct ConnectableProcessor : public processor, public Connectable<samp_t>, public traceable<ConnectableProcessor>
 		{
 
-			virtual ConnectableProcessor& input()  { return *this; }
-			virtual ConnectableProcessor& output() { return *this; }
+			virtual ConnectableProcessor& input_proc()  { return *this; }
+			virtual ConnectableProcessor& output_proc() { return *this; }
 
 			virtual std::ostream& trace(std::ostream& os) const override
 			{

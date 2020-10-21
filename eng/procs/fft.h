@@ -47,16 +47,21 @@ namespace sel {
 
 
 			};
-			template<typename traits> struct fftr_t : public Processor1A1B<traits::input_frame_size, traits::input_frame_size>, virtual public creatable<fftr_t<traits> >
+			template<typename traits> struct fftr_t : public Processor1A1B<traits::input_frame_size, 2 * (traits::input_frame_size / 2 + 1)>, virtual public creatable<fftr_t<traits> >
 			{
 				static constexpr size_t SZ = traits::input_frame_size;
 
 				friend class unit_test_fft;
 
 				GFFT<SZ, samp_t, 1> gfft;
+
+				// Unlike full fft, which transforms the output port 'in place',  real fft needs an internal buffer
+				// This is because although we only have the output array size of N/2+1  but still need
+				// the full N for the fft calculation itself.
+				
 				csamp_t complex_data[SZ];
-				// for real fft, the first N complex values should be interpreted as reals
-				samp_t * const real_data = reinterpret_cast<samp_t *>(&complex_data[0]);
+				// 
+				samp_t * const data_as_array_of_reals = reinterpret_cast<samp_t *>(&complex_data[0]);
 
 			public:
 
@@ -76,10 +81,11 @@ namespace sel {
 					for (size_t i = 0; i < SZ; ++i)
 						complex_data[i] = this->in[i];
 
-					gfft.fft(real_data);
+					gfft.fft(data_as_array_of_reals);
 
-					for (size_t i = 0; i < SZ; ++i)
-						this->out[i] = real_data[i];
+					// ignore conjugates
+					for (size_t i = 0; i < 2 * (SZ / 2 + 1); ++i)
+						this->out[i] = data_as_array_of_reals[i];
 
 
 				}

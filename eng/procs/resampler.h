@@ -88,7 +88,7 @@ namespace sel {
 //				virtual const std::string type() const override { return "resampler"; }
 
 
-				ConnectableProcessor& input() final { return input_; }
+				ConnectableProcessor& input_proc() final { return input_; }
 				
 				// default constuctor needed for factory creation
 				explicit resampler() : data_source(rate_t(OutputFs, 1)), input_(this)

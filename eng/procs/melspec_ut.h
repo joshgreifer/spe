@@ -97,13 +97,15 @@ void run() {
 	py::array_t<double> rand_py(ut_traits::input_frame_size, rng1.out);
 
 	// Validate hann window against python
+	/// TODO:  Should be part of window unit test
+	SEL_UNIT_TEST_ITEM("hann window");
 	py::array_t<double> hann_window_py = librosa.attr("filters").attr("get_window")("hann", ut_traits::input_frame_size);
-	auto hann_window_py_data = python::make_vector_from_1d_numpy_array(hann_window_py);
+	auto hann_window_py_vec = python::make_vector_from_1d_numpy_array(hann_window_py);
 	for (size_t i = 0; i < ut_traits::input_frame_size; ++i)
-		SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(hann_window_py_data[i] * rng1.out[i], window1.out[i]);
+		SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(hann_window_py_vec[i] * rng1.out[i], window1.out[i]);
 // mel2 = librosa.feature.melspectrogram(y=y, sr=16000,  n_mels=80, fmin=0, fmax=8000,
 // center=False, n_fft=1024, htk=True, window=np.ones(1024), hop_length=1024, power=1)
-
+	SEL_UNIT_TEST_ITEM("librosa.feature.melspectrogram()");
 	auto librosa_melspectrogram = librosa.attr("feature").attr("melspectrogram");
 	py::array_t<double>melspec_py = librosa_melspectrogram("y"_a = rand_py,
 		"sr"_a = ut_traits::input_fs,
@@ -117,9 +119,9 @@ void run() {
 		"power"_a = 1,
 		"window"_a = "hann"
 	);
-	auto melspec_py_data = python::make_vector_from_1d_numpy_array(melspec_py);
+	auto melspec_py_vec = python::make_vector_from_1d_numpy_array(melspec_py);
 	for (size_t i = 0; i < ut_traits::n_mels; ++i)
-		SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(melspec_py_data[i], melspec1.out[i])
+		SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(melspec_py_vec[i], melspec1.out[i])
 		;
 }
 

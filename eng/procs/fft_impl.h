@@ -90,10 +90,10 @@ public:
       T wtemp,tempr,tempi,wr,wi,wpr,wpi;
 //    Change dynamic calculation to the static one
 //      wtemp = sin(M_PI/N);
-      wtemp = -SIGN * Sin<N,1,T>::value();
+      wtemp = SIGN * Sin<N,1,T>::value();
       wpr = -2.0*wtemp*wtemp;
 //      wpi = -sin(2*M_PI/N);
-      wpi = SIGN * Sin<N,2,T>::value();
+      wpi = -SIGN * Sin<N,2,T>::value();
       wr = 1.0;
       wi = 0.0;
       for (unsigned i=0; i<N; i+=2) {

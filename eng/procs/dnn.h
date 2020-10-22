@@ -29,7 +29,7 @@ namespace sel
 					auto mat = trained_net_.forward(output_layer_name_);
 					
 					for (size_t i = 0; i < OutW; ++i) 
-						this->out[i] = mat.at<float>((int)i);
+						this->out[i] = mat.template at<float>((int)i);
 				}
 				// default constuctor needed for factory creation
 				explicit dnn() = default;

@@ -75,7 +75,7 @@ namespace sel {
 					if (datepos) {
 						datepos[0] = '%';
 						datepos[1] = 's';
-						sprintf(temp, matlabfilename_, CurrentTimeString());
+						sprintf(temp, matlabfilename_, CurrentTimeString().data());
 						strcpy(matlabfilename_, temp);
 					}
 
@@ -83,7 +83,7 @@ namespace sel {
 					if (datepos) {
 						datepos[0] = '%';
 						datepos[1] = 's';
-						sprintf(temp, matlabfilename_, CurrentDateString());
+						sprintf(temp, matlabfilename_, CurrentDateString().data());
 						strcpy(matlabfilename_, temp);
 					}
 

@@ -146,11 +146,11 @@ namespace sel {
 
 					auto trigger_ = instance_manager::ptr_from_handle<eng::semaphore>(trigger_id);
 					if (!trigger_)
-						throw eng_ex(format_message("Couldn't add schedule: %s is not a schedule trigger.", trigger_id));
+						throw eng_ex(format_message("Couldn't add schedule: %s is not a schedule trigger.", trigger_id.c_str()));
 
 					auto action_ = instance_manager::ptr_from_handle<functor>(action_id);
 					if (!action_)
-						throw eng_ex(format_message("Couldn't add schedule: %s is not a schedule action (functor).", action_id));
+						throw eng_ex(format_message("Couldn't add schedule: %s is not a schedule action (functor).", action_id.c_str()));
 
 					eng::scheduler::get().add(trigger_, *action_);
 

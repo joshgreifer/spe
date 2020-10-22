@@ -23,7 +23,7 @@ public:
 
 	auto& strftime(const char *fmt, std::time_t timer_)
 	{
-		std::strftime((char *)data(), SZ, fmt, timer_);
+		std::strftime((char *)data(), SZ, fmt, reinterpret_cast<const tm *>(timer_));
 		return *this;
 	}
 

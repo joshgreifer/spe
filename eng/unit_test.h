@@ -25,7 +25,10 @@ namespace  TEST_NAME ## _ut { \
 			try { \
 			run(); \
 			} catch(std::exception &ex) { std::cout << ex.what(); } \
-			printf("Passed: %d Failed: %d\n\n", npassed, nfailed); \
+			if (nfailed) std::cout << "FAILED.\n"; \
+			else if (nfailed == 0 && npassed == 0) std::cout << "NO TESTS IMPLEMENTED.\n"; \
+			else printf("\nPASSED. (%d assertion%s)\n", npassed, npassed == 1 ? "" : "s"); \
+			std::cout << "=====================================================\n\n"; \
 		}
 
 #define SEL_UNIT_TEST_END \
@@ -33,7 +36,7 @@ namespace  TEST_NAME ## _ut { \
 	; \
 } // unit_test
 void SEL_UNIT_TEST_ITEM(const char* msg) {
-	printf("\n* SUBTEST: %s\n", msg);
+	printf(" %s...", msg);
 }
 
 #define SEL_UNIT_TEST_ASSERT(EXPR) if (EXPR) { ++npassed; } else { printf("\n\n>>>>>>>>>> ASSERT FAILED: (%s:%d) %s\n\n", __FILE__, __LINE__, #EXPR); ++nfailed; }

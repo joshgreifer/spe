@@ -19,16 +19,19 @@ message(STATUS "Found Python ${PYTHON_LIBRARY_SUFFIX} in: ${PYTHON_PREFIX}: ${PY
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	add_compile_options(/bigobj /std:c++17)
+else()
+	add_compile_options(-std=c++17)
 endif()
+
 # add the executable
 
 add_executable(spe_test6 eng6_tests.cpp)
 add_executable(spe_test7 eng7_tests.cpp)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-	set_property(TARGET spe_test7 PROPERTY CXX_STANDARD 17)
-	set_property(TARGET spe_test7 PROPERTY CXX_STANDARD_REQUIRED ON)
-endif()
+set_property(TARGET spe_test6 PROPERTY CXX_STANDARD 17)
+set_property(TARGET spe_test6 PROPERTY CXX_STANDARD_REQUIRED ON)
+set_property(TARGET spe_test7 PROPERTY CXX_STANDARD 17)
+set_property(TARGET spe_test7 PROPERTY CXX_STANDARD_REQUIRED ON)
 
 file(COPY artefacts/dnn_ut.onnx DESTINATION .)
 file(COPY artefacts/test_audio_16k_i16.wav DESTINATION .)

@@ -44,10 +44,10 @@ namespace {
 #pragma pack(push)
 #pragma pack(1)
 
-	template <size_t Sz, char Pad='\0'> struct CHAR_ARRAY {
-	char c_[Sz];
+	template <size_t Sz, char Pad = '\0'> struct CHAR_ARRAY {
+		char c_[Sz];
 
-		bool operator==(const char *s)
+		bool operator==(const char* s)
 		{
 			if (!s)
 				return false;
@@ -59,7 +59,7 @@ namespace {
 			return s[i] == '\0';
 		}
 
-		bool operator!=(const char *s)
+		bool operator!=(const char* s)
 		{
 			return !this->operator==(s);
 		}
@@ -72,7 +72,7 @@ namespace {
 						break;
 					c_[i] = s[i];
 				}
-					
+
 			for (; i < Sz; ++i)
 				c_[i] = Pad;
 		}
@@ -97,22 +97,22 @@ namespace {
 		short BitsPerSample;
 
 		RIFFHeader() : IdRIFF("RIFF"),
-		szRIFF(0),
-		RiffFormat("WAVE"),
-		IdFmt("fmt "),
-		szFmt(16),
-		AudioFormat(1),
-		               NumChannels(1),
-		               SampleRate(16000),
-		               ByteRate(0),
-		               BlockAlign(0),
-		               BitsPerSample(16)
+			szRIFF(0),
+			RiffFormat("WAVE"),
+			IdFmt("fmt "),
+			szFmt(16),
+			AudioFormat(1),
+			NumChannels(1),
+			SampleRate(16000),
+			ByteRate(0),
+			BlockAlign(0),
+			BitsPerSample(16)
 		{
 		}
 
-		explicit RIFFHeader(const char *bytes)
+		explicit RIFFHeader(const char* bytes)
 		{
-			*this = *reinterpret_cast<RIFFHeader *>(const_cast<char *>(bytes));
+			*this = *reinterpret_cast<RIFFHeader*>(const_cast<char*>(bytes));
 		}
 	};
 
@@ -173,7 +173,7 @@ namespace sel {
 
 				file_input_stream fis;
 
-				const char *filename_;
+				const char* filename_;
 
 				int fs_;
 
@@ -188,13 +188,13 @@ namespace sel {
 					RIFFHeader header;
 					DATAChunk data;
 
-					file_descriptor fd = _open(filename_, O_RDONLY+O_BINARY);
+					file_descriptor fd = open(filename_, O_RDONLY + O_BINARY);
 
 					try {
 						if (-1 == fd)
 							throw sys_ex();
 
-						if (!_read(fd, &header, sizeof(header)))
+						if (!read(fd, &header, sizeof(header)))
 							throw sys_ex();
 
 
@@ -222,7 +222,7 @@ namespace sel {
 						this->numChannels = header.NumChannels;
 #if SUPPORTS_STEREO
 						if this->numChannels > 2)
-							throw eng_ex("WAV File has more than 2 audio channels.");
+						throw eng_ex("WAV File has more than 2 audio channels.");
 #else
 						if (this->numChannels > 1)
 							throw eng_ex("WAV File has more than 1 audio channel.");
@@ -233,15 +233,15 @@ namespace sel {
 						}
 						else {
 							// scan to end of fmt chunk
-							_lseek(fd, header.szFmt - 16, SEEK_CUR);
+							lseek(fd, header.szFmt - 16, SEEK_CUR);
 						}
 						// repeatedly next chunks into struct, assume it's a data chunk.
 						do {
-							if (!_read(fd, &data, sizeof(data)))
+							if (!read(fd, &data, sizeof(data)))
 								throw sys_ex();
 							if (data.IdData == "data")
 								break;
-							_lseek(fd, data.szData, SEEK_CUR); // not 'data', skip chunk
+							lseek(fd, data.szData, SEEK_CUR); // not 'data', skip chunk
 
 						} while (true); // skip non-data chunks
 
@@ -251,15 +251,15 @@ namespace sel {
 						if (data.IdData != "data")
 							throw eng_ex("WAV File format is incorrect. (Missing 'data' chunk).");
 
-						datastart = _tell(fd);
+						datastart = tell(fd);
 
 
-						this->totDuration = (8 * (double)data.szData / (header.BitsPerSample * header.NumChannels)) /this->fs_;
+						this->totDuration = (8 * (double)data.szData / (header.BitsPerSample * header.NumChannels)) / this->fs_;
 
 					}
 					catch (eng_ex& ex) {
 
-						if (fd > 0) ::_close(fd);
+						if (fd > 0) close(fd);
 						throw ex;
 					}
 
@@ -276,14 +276,14 @@ namespace sel {
 				virtual const std::string type() const override { return "wav file reader"; }
 				wav_file_data_source() : scalar_stream_reader<SAMP16, port_width>(nullptr, rate_t()) {}
 
-				wav_file_data_source(const uri& u) : scalar_stream_reader<SAMP16, port_width>(nullptr, rate_t()),  fd_(0), filename_(nullptr)
+				wav_file_data_source(const uri& u) : scalar_stream_reader<SAMP16, port_width>(nullptr, rate_t()), fd_(0), filename_(nullptr)
 				{
 
 					u.assert_scheme(uri::FILE);
 					filename_ = u.path();
 
 				}
-				wav_file_data_source(params& args) : wav_file_data_source(args.get<const char *>("uri"))
+				wav_file_data_source(params& args) : wav_file_data_source(args.get<const char*>("uri"))
 				{
 				}
 
@@ -291,13 +291,13 @@ namespace sel {
 				{
 					this->set_stream(&fis);
 					this->fd_ = ParseHeader();
-					auto pos = _tell(this->fd_);
+					auto pos = tell(this->fd_);
 					fis.attach(this->fd_);
-				
+
 					this->set_rate(rate_t(this->fs_, 1));
 
 					if (numChannels == 1)
-						;					
+						;
 					else
 #if SUPPORTS_STEREO
 						if (numChannels == 2)
@@ -306,7 +306,7 @@ namespace sel {
 #else
 						throw eng_ex("Number of channels not supported");
 #endif
-					
+
 				}
 
 				void freeze() final

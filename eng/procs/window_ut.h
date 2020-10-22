@@ -54,16 +54,7 @@ using wav_reader = sel::eng::proc::wav_file_data_source<ut_traits::input_frame_s
 sel::eng::Const input = std::vector<double>(ut_traits_no_overlap::input_frame_size, 1.0);
 static constexpr size_t N = ut_traits_no_overlap::input_frame_size;
 
-std::array<samp_t, N> matlab_hamming_result = { {
-	0.0800000000000000,
-	0.253194691144983,
-	0.642359629619905,
-	0.954445679235113,
-	0.954445679235113,
-	0.642359629619905,
-	0.253194691144983,
-	0.0800000000000000			}
-};
+
 
 std::array<samp_t, N> matlab_kaiser_result = { {
 	0.0367108922712867,
@@ -80,20 +71,6 @@ std::array<samp_t, N> matlab_kaiser_result = { {
 
 void run() {
 
-	hamming_window hamming_window;
-	hamming_window.ConnectFrom(input);
-	hamming_window.freeze();
-	hamming_window.process();
-
-	const auto my_hamming_result = hamming_window.out;
-
-	// compare matlab fft
-	for (size_t i = 0; i < N; ++i) {
-		auto e = abs(my_hamming_result[i] - matlab_hamming_result[i]);
-		//if (e >= 1e-10)
-		SEL_UNIT_TEST_ASSERT(e < 1e-10);
-
-	}
 
 	kaiser_window kaiser_window;
 	kaiser_window.ConnectFrom(input);
@@ -101,14 +78,12 @@ void run() {
 	kaiser_window.process();
 
 	const auto my_kaiser_result = kaiser_window.out;
-
+	SEL_UNIT_TEST_ITEM("kaiser window");
 	// compare matlab fft
-	for (size_t i = 0; i < N; ++i) {
-		auto e = abs(my_kaiser_result[i] - matlab_kaiser_result[i]);
-		//if (e >= 1e-10)
-		SEL_UNIT_TEST_ASSERT(e < 1e-10);
+	for (size_t i = 0; i < N; ++i) 
+		SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(my_kaiser_result[i], matlab_kaiser_result[i]);
 
-	}
+	
 
 
 	//sel::eng::proc::sample::Logger logger;
@@ -140,14 +115,16 @@ void run() {
 	static constexpr auto hop_length = ut_traits_overlap::input_frame_size - ut_traits_overlap::overlap;
 
 	const rate_t overlap_factor(ut_traits_overlap::input_frame_size, hop_length);
-
+	SEL_UNIT_TEST_ITEM("overlap window");
+	SEL_UNIT_TEST_ITEM("rate");
 	SEL_UNIT_TEST_ASSERT(output_schedule.expected_rate() == input_rate * overlap_factor);
 
+	SEL_UNIT_TEST_ITEM("hop_length");
 	while (s.step()) {
 		
-		for (auto v:  rectangular_window.oport)
-			std::cerr << v << ' ';
-		std::cerr << std::endl;
+		//for (auto v:  rectangular_window.oport)
+		//	std::cerr << v << ' ';
+		//std::cerr << std::endl;
 		
 		SEL_UNIT_TEST_ASSERT(static_cast<size_t>(rectangular_window.out[0] + 0.5) % hop_length == 0);
 	}

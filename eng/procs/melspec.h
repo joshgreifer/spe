@@ -14,7 +14,7 @@ namespace sel {
 			{
 				
 			private:
-				melspec_impl<traits::input_fs, traits::n_mels, traits::input_frame_size> impl_;
+				melspec_impl<double, traits::input_fs, traits::n_mels, traits::input_frame_size> impl_;
 			public:
 
 				const std::string type() const final {

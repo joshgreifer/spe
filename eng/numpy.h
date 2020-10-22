@@ -22,15 +22,15 @@ namespace sel {
 		 * Linspace
 		 */
 	    // https://stackoverflow.com/questions/27028226/python-linspace-in-c
-		template<typename T>
-		std::vector<double> linspace(T start_in, T end_in, size_t num_in)
+		template<typename T, typename internal_T=double>
+		std::vector<internal_T> linspace(T start_in, T end_in, size_t num_in)
 		{
 
-			std::vector<double> linspaced;
+			std::vector<internal_T> linspaced;
 
-			double start = static_cast<double>(start_in);
-			double end = static_cast<double>(end_in);
-			double num = static_cast<double>(num_in);
+			double start = static_cast<internal_T>(start_in);
+			double end = static_cast<internal_T>(end_in);
+			double num = static_cast<internal_T>(num_in);
 
 			if (num == 0) { return linspaced; }
 			if (num == 1)

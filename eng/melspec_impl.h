@@ -1,33 +1,49 @@
 #pragma once
 
 #include <cmath>
-/*
-	MEL spectrum implementation, derived from librosa's implementation
+/**
+	MEL spectrum implementation, derived from librosa's implementation.
+	Given an fft magnitude spectrum, it produces a mel-scaled spectrum.
+	
+	Author: Josh Greifer
+	Date:	20 Oct 2020
+
+	melspec_impl<float, 16000, 80, 512>m;
+
+	
+	float fft_mag[257];  // fft magnitude
+	float mel[80];	// output mel
+
+	m.calculateMelFrequencySpectrum(fft_mag, mel);
+
+	This is gives the same results as
+	mel_filterbank = librosa.filters.mel(16000, 512, n_mels=80, fmin=0, fmax=8000, htk=True)
+	mel = mel_filterbank.dot(fft_mag)
 */
 
-template<unsigned int Fs, unsigned int Nmels, unsigned int Nffts>class melspec_impl
+template<class T, unsigned int sr, unsigned int nMels, unsigned int nFft, class internal_T=double>class melspec_impl
 {
-	static constexpr size_t spectrum_length = Nffts / 2 + 1;
-	static constexpr double NyquistFrequency = Fs / 2.0;
+	static constexpr size_t real_spectrum_length = nFft / 2 + 1;
+	static constexpr internal_T nyquist_frequency = sr / 2.0;
 
-	std::vector<double> calc_mel_frequencies(size_t n_mels = Nmels+2, double fmin = 0, double fmax = NyquistFrequency, bool htk=true)
+	std::vector<internal_T> calc_mel_frequencies(size_t n_mels = nMels + 2, internal_T fmin = 0, internal_T fmax = nyquist_frequency, bool htk=true)
 	{
 		auto min_mel = frequency_to_mel_(fmin);
 		auto max_mel = frequency_to_mel_(fmax);
-		auto mels = sel::numpy::linspace(min_mel, max_mel, n_mels);
+		auto mels = sel::numpy::linspace<internal_T, internal_T>(min_mel, max_mel, n_mels);
 		std::transform(mels.begin(), mels.end(), mels.begin(), [](auto v) { return mel_to_frequency(v);  });
 		return mels;
 	}
 
 	
 public:
-	melspec_impl() : weights_( new std::array<double, Nmels * spectrum_length>())
+	melspec_impl() : weights_( new std::array<double, nMels * real_spectrum_length>())
 	{
 		
 		auto mel_f = calc_mel_frequencies();
-		auto fft_freqencies = sel::numpy::linspace(0.0, Fs / 2.0, spectrum_length);
+		auto fft_freqencies = sel::numpy::linspace<internal_T, internal_T>(0.0, sr / 2.0, real_spectrum_length);
 		// auto fdiff = sel::numpy::diff(mel_f);
-		for (size_t i = 0; i < Nmels; ++i)
+		for (size_t i = 0; i < nMels; ++i)
 		{
 			auto m0 = mel_f[i];
 			auto m1 = mel_f[i + 1];
@@ -35,7 +51,7 @@ public:
 			auto fdiff = m1 - m0;
 			auto fdiff_1 = m2 - m1;
 			auto enorm = 2.0 / (m2 - m0);
-			for (size_t j = 0; j < spectrum_length; ++j)
+			for (size_t j = 0; j < real_spectrum_length; ++j)
 			{
 				const auto f = fft_freqencies[j];
 				const auto ramp_i = m0 - f;
@@ -57,17 +73,17 @@ public:
 	{
 		delete weights_;
 	}
-	void calculateMelFrequencySpectrum(const double* inputMagnitudeSpectrum, double *outputMelFrequencySpectrum)
+	void calculateMelFrequencySpectrum(const T* inputMagnitudeSpectrum, T *outputMelFrequencySpectrum)
 
 	{
-		for (int i = 0; i < Nmels; i++)
+		for (int i = 0; i < nMels; ++i)
 		{
-			double coeff = 0;
+			internal_T coeff = 0;
 
-			for (size_t j = 0; j < spectrum_length; j++)
+			for (size_t j = 0; j < real_spectrum_length; ++j)
 				coeff += inputMagnitudeSpectrum[j] * weights(i,j);
 
-			outputMelFrequencySpectrum[i] = coeff;
+			outputMelFrequencySpectrum[i] = static_cast<T>(coeff);
 		}
 
 	}
@@ -77,19 +93,19 @@ public:
 	}
 private:
 
-	mutable std::array<double, Nmels * spectrum_length> *weights_;
+	mutable std::array<internal_T, nMels * real_spectrum_length> *weights_;
 	
-	double& weights(size_t coeff, size_t specbin) const
+	internal_T& weights(size_t coeff, size_t specbin) const
 	{
-		return (*weights_)[coeff * spectrum_length + specbin];
+		return (*weights_)[coeff * real_spectrum_length + specbin];
 	}
 
-	static double frequency_to_mel_(double frequency, bool htk = true)
+	static internal_T frequency_to_mel_(internal_T frequency, bool htk = true)
 	{
 		return 2595.0 * log10(1.0 + frequency / 700.0);
 	}
 	
-	static double mel_to_frequency(double mel, bool htk = true)
+	static internal_T mel_to_frequency(internal_T mel, bool htk = true)
 	{
 		return 700.0 * (pow(10.0, mel / 2595.0) - 1.0);
 	}

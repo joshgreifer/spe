@@ -91,7 +91,7 @@ namespace sel {
 				ConnectableProcessor& input_proc() final { return input_; }
 				
 				// default constuctor needed for factory creation
-				explicit resampler() : data_source(rate_t(OutputFs, 1)), input_(this)
+				explicit resampler() : data_source<OutW>(rate_t(OutputFs, 1)), input_(this)
 				{
 					
 				}

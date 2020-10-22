@@ -356,8 +356,14 @@ namespace sel {
 	For example,  if an lpc "expects" its SIGNAL input port to be at least width N (i.e. lpc.inports[0].size() >= N), it must make that check
 	in its freeze() method.
 	*/
-
-	template<typename T> class Connectable: public connectable_t<Connectable<T>>, public traceable< Connectable<T> >
+	struct freezeable
+	{
+	public:
+		virtual ~freezeable() = default;
+		virtual void freeze(void) = 0;
+	};
+	
+	template<typename T> class Connectable: public freezeable, public connectable_t<Connectable<T>>, public traceable< Connectable<T> >
 	{
 	private:
 

@@ -50,102 +50,92 @@ namespace sel {
 			boost::asio::io_context& ioc() { return context.get(); }
 		};
 
-		class schedule final : public traceable<schedule>
-		{
-			friend class scheduler;
-			
-			semaphore * trigger_;
-			function_object f_;
-			functor& action_;
 
-		public:
-			auto trigger() const { return trigger_; }
-			auto& action() const { return action_; }
-			
-			virtual std::ostream& trace(std::ostream& os) const override
-
-			{
-				os << "{ " << *trigger_ << ": " << action_ << " }";
-				return os;
-			}
-
-
-			schedule(semaphore* trigger, functor& action_) :
-				trigger_(trigger),
-				action_(action_) {}
-
-			schedule(semaphore* trigger_, func f) :
-				trigger_(trigger_),
-				f_(function_object(f)),
-				action_(f_) {}
-
-			size_t acquire() const { return trigger_->acquire(); }
-
-			void invoke(size_t repeat_count = 1U) { 
-				trigger_->raise(repeat_count); 
-				while (trigger_->acquire())
-					action_();
-
-			}
-
-			// freeze and init the action if it's a processor
-			virtual void init()
-			{
-				auto c = dynamic_cast<Connectable<samp_t> *>(&action_);
-				if (c) c->freeze();
-				
-				auto p = dynamic_cast<processor *>(&action_);
-
-				if (p) p->init(this);
-
-			}
-			virtual void term()
-			{
-				auto p = dynamic_cast<processor *>(&action_);
-
-				if (p) p->term(this);
-			}
-
-			void begin_sampling() const { trigger_->rate().begin_sampling(); }
-			double actual_rate() const { return trigger_->rate().actual(); }
-			rate_t expected_rate() const { return trigger_->rate().expected(); }
-
-		};
-
+		
 		class periodic_event : public semaphore, public creatable<periodic_event>
 		{
 			std::chrono::nanoseconds period_ns_;
 			boost::asio::high_resolution_timer timer_;
 
+
 			void reschedule()
 			{
-//					std::cerr << "\n> Reschedule:          Semaphore count " << this->trigger_ << "\tasio_timer expiry " << std::chrono::time_point_cast<std::chrono::seconds>(timer_.expiry()).time_since_epoch().count();
-				timer_.async_wait([this](const boost::system::error_code& /*e*/) {
-					reset();
-					raise();
-					//std::cerr << "\n< Reschedule callback: Semaphore count " << this->count() << "\tasio_timer expiry " << std::chrono::time_point_cast<std::chrono::seconds>(timer_.expiry()).time_since_epoch().count();
-					timer_.expires_at(timer_.expiry() + period_ns_);
-					reschedule();
+				//					std::cerr << "\n> Reschedule:          Semaphore count " << this->trigger_ << "\tasio_timer expiry " << std::chrono::time_point_cast<std::chrono::seconds>(timer_.expiry()).time_since_epoch().count();
+				timer_.async_wait([this](const boost::system::error_code& e) {
 
-				});
-				
+					if (e) {
+
+						std::cerr << "\n*** Periodic event cancelled: " << e.message();
+
+					}
+					else {
+						//reset();
+						raise();
+						//std::cerr << "\n< Reschedule callback: Semaphore count " << this->count() << "\tasio_timer expiry " << std::chrono::time_point_cast<std::chrono::seconds>(timer_.expiry()).time_since_epoch().count();
+						timer_.expires_at(timer_.expiry() + period_ns_);
+						reschedule();
+					}
+					});
+
+
 			}
 		public:
 			periodic_event() : period_ns_(0), timer_(asio_scheduler::get().ioc()) {}
-			
+
 			periodic_event(params& args) : periodic_event(args.get<rate_t>("rate")) {}
-			
+
 			periodic_event(const rate_t& rate) : semaphore(0, rate),
 				period_ns_(std::chrono::nanoseconds(static_cast<long long>(1000000000.0 / rate))),
 				timer_(asio_scheduler::get().ioc())
 			{
-				timer_.expires_after(period_ns_);
-				reschedule();
 			}
 
+			void init()
+			{
+				timer_.expires_after(period_ns_);
+				reschedule();
 
+			}
+			virtual ~periodic_event()
+			{
+				timer_.cancel();
+			}
 
 		};
+//		class periodic_event_orig : public semaphore, public creatable<periodic_event>
+//		{
+//			std::chrono::nanoseconds period_ns_;
+//			boost::asio::high_resolution_timer timer_;
+//
+//			void reschedule()
+//			{
+////					std::cerr << "\n> Reschedule:          Semaphore count " << this->trigger_ << "\tasio_timer expiry " << std::chrono::time_point_cast<std::chrono::seconds>(timer_.expiry()).time_since_epoch().count();
+//				timer_.async_wait([this](const boost::system::error_code& /*e*/) {
+//					reset();
+//					raise();
+//					//std::cerr << "\n< Reschedule callback: Semaphore count " << this->count() << "\tasio_timer expiry " << std::chrono::time_point_cast<std::chrono::seconds>(timer_.expiry()).time_since_epoch().count();
+//					timer_.expires_at(timer_.expiry() + period_ns_);
+//					reschedule();
+//
+//				});
+//				
+//			}
+//		public:
+//			periodic_event_orig() : period_ns_(0), timer_(asio_scheduler::get().ioc()) {}
+//			
+//			periodic_event_orig(params& args) : periodic_event_orig(args.get<rate_t>("rate")) {}
+//			
+//			periodic_event_orig(const rate_t& rate) : semaphore(0, rate),
+//				period_ns_(std::chrono::nanoseconds(static_cast<long long>(1000000000.0 / rate))),
+//				timer_(asio_scheduler::get().ioc())
+//			{
+//				timer_.expires_after(period_ns_);
+//				reschedule();
+//			}
+//
+//
+//
+//		};
 		
 //		class periodic_func : public schedule
 //		{
@@ -178,7 +168,70 @@ namespace sel {
 //			}
 //
 //		};
-		
+		class schedule final : public traceable<schedule>
+		{
+			friend class scheduler;
+
+			semaphore* trigger_;
+			function_object f_;
+			functor& action_;
+
+		public:
+			auto trigger() const { return trigger_; }
+			auto& action() const { return action_; }
+
+			virtual std::ostream& trace(std::ostream& os) const override
+
+			{
+				os << "{ " << *trigger_ << ": " << action_ << " }";
+				return os;
+			}
+
+
+			schedule(semaphore* trigger, functor& action_) :
+				trigger_(trigger),
+				action_(action_) {}
+
+			schedule(semaphore* trigger_, func f) :
+				trigger_(trigger_),
+				f_(function_object(f)),
+				action_(f_) {}
+
+			size_t acquire() const { return trigger_->acquire(); }
+
+			void invoke(size_t repeat_count = 1U) {
+				trigger_->raise(repeat_count);
+				while (trigger_->acquire())
+					action_();
+
+			}
+
+			// freeze and init the action if it's a processor
+			virtual void init()
+			{
+				if (auto* pt = dynamic_cast<periodic_event*>(trigger_))
+					pt->init();
+
+				auto c = dynamic_cast<freezeable*>(&action_);
+				if (c) c->freeze();
+
+				auto p = dynamic_cast<processor*>(&action_);
+
+				if (p) p->init(this);
+
+			}
+			virtual void term()
+			{
+				auto p = dynamic_cast<processor*>(&action_);
+
+				if (p) p->term(this);
+			}
+
+			void begin_sampling() const { trigger_->rate().begin_sampling(); }
+			double actual_rate() const { return trigger_->rate().actual(); }
+			rate_t expected_rate() const { return trigger_->rate().expected(); }
+
+		};
 		class scheduler : public singleton<scheduler>
 		{
 
@@ -393,7 +446,7 @@ SEL_UNIT_TEST(periodic_event)
 struct ut_traits
 {
 
-	static constexpr size_t rate = 10000;
+	static constexpr size_t rate = 1;
 	static constexpr size_t test_duration_secs = 5;
 	static constexpr size_t iters_to_run = rate * test_duration_secs;
 

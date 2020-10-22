@@ -46,10 +46,7 @@ public:
 	}	
 };
 
-template<class T> vector<T>make_vector_from_1d_numpy_array(py::array_t<T>py_array)
-{
-	return std::vector<T>(py_array.data(), py_array.data() + py_array.size());
-}
+
 
 void run() {
 	auto librosa = python::get().librosa;
@@ -63,14 +60,17 @@ void run() {
 	py::array_t<float> filters_py = librosa.attr("filters").attr("mel")(16000, 1024, "n_mels"_a = 80, "fmin"_a = 0, "fmax"_a = 8000, "htk"_a = true);
 	auto filters_data = filters_py.data();
 	auto filters_size = filters_py.size();
+	
 	SEL_UNIT_TEST_ITEM("melspec.filterBank() filters size");
 	SEL_UNIT_TEST_ASSERT(filters_py.size() == filters.size())
+	
 	SEL_UNIT_TEST_ITEM("melspec.filterBank() filters data");
 	for (size_t i = 0; i < filters.size(); ++i)
 		SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(filters[i], filters_data[i])
 	
 	const auto seed = 5489U;
 	sel::eng::proc::rand<ut_traits::input_frame_size> rng1(seed);
+	
 	hann_window window1;
 	fft fft1;
 	mag mag1;
@@ -90,9 +90,17 @@ void run() {
 	// compare with librosa
 	SEL_UNIT_TEST_ITEM("melspec process()");
 
-	py_np_random.attr("seed")(seed);
+	// Assume rand() has been already validated against python in unit test use our rand output.
+	// If not, uncomment to use python's rand
+	// py_np_random.attr("seed")(seed);
 	// py::array_t<double> rand_py = py_np_random.attr("random")(ut_traits::input_frame_size);
 	py::array_t<double> rand_py(ut_traits::input_frame_size, rng1.out);
+
+	// Validate hann window against python
+	py::array_t<double> hann_window_py = librosa.attr("filters").attr("get_window")("hann", ut_traits::input_frame_size);
+	auto hann_window_py_data = python::make_vector_from_1d_numpy_array(hann_window_py);
+	for (size_t i = 0; i < ut_traits::input_frame_size; ++i)
+		SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(hann_window_py_data[i] * rng1.out[i], window1.out[i]);
 // mel2 = librosa.feature.melspectrogram(y=y, sr=16000,  n_mels=80, fmin=0, fmax=8000,
 // center=False, n_fft=1024, htk=True, window=np.ones(1024), hop_length=1024, power=1)
 
@@ -109,9 +117,10 @@ void run() {
 		"power"_a = 1,
 		"window"_a = "hann"
 	);
-	auto melspec_py_data = make_vector_from_1d_numpy_array(melspec_py);
+	auto melspec_py_data = python::make_vector_from_1d_numpy_array(melspec_py);
 	for (size_t i = 0; i < ut_traits::n_mels; ++i)
-		SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(melspec_py_data[i], melspec1.out[i]);
+		SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(melspec_py_data[i], melspec1.out[i])
+		;
 }
 
 SEL_UNIT_TEST_END

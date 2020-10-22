@@ -9,8 +9,8 @@
 #endif
 #endif
 
+#define COMPILE_WITH_PYTHON
 #define COMPILE_UNIT_TESTS
-
 #include  "../eng/eng6.h"
 #include  "../eng/unit_test.h"
 
@@ -55,7 +55,7 @@ int main()
 
 	//SEL_RUN_UNIT_TEST(dct)
 	SEL_RUN_UNIT_TEST(numpy)
-	//SEL_RUN_UNIT_TEST(fft)
+	SEL_RUN_UNIT_TEST(fft)
 	//SEL_RUN_UNIT_TEST(lattice_filter)
 	// SEL_RUN_UNIT_TEST(periodic_event)
 	//SEL_RUN_UNIT_TEST(resampler)

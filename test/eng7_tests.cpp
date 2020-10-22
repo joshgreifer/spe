@@ -8,7 +8,7 @@
 #define _SCL_SECURE_NO_WARNINGS
 #endif
 #endif
-
+#define COMPILE_WITH_PYTHON
 #define COMPILE_UNIT_TESTS
 
 

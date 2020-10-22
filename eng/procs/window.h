@@ -62,7 +62,7 @@ namespace sel {
 					template<size_t Winsize = traits::input_frame_size>static void process_buffer(const samp_t* in, samp_t* out)
 					{
 						for (size_t i = 0; i < Winsize; ++i)
-							out[i] = in[i] * (0.54 - 0.46 * cos((2.0 * M_PI * i) / (Winsize - 1)));
+							out[i] = in[i] * (0.54 - 0.46 * cos((2.0 * M_PI * i) / Winsize));
 
 					}
 					static const char* name() { return "hamming_window"; }
@@ -72,7 +72,7 @@ namespace sel {
 					template<size_t Winsize = traits::input_frame_size>static void process_buffer(const samp_t* in, samp_t* out)
 					{
 						for (size_t i = 0; i < Winsize; ++i)
-							out[i] = in[i] * (0.5 - 0.5 * cos((2.0 * M_PI * i) / (Winsize - 1)));
+							out[i] = in[i] * (0.5 - 0.5 * cos((2.0 * M_PI * i) / Winsize));
 
 					}
 					static const char* name() { return "hann_window"; }

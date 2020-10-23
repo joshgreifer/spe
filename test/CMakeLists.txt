@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 
 # set the project name
-project(spe)
+#project(spe)
 
 #set(VCPKG_TARGET_TRIPLET x64-linux)
 set(CMAKE_TOOLCHAIN_FILE "/Users/josh/vcpkg/scripts/buildsystems/vcpkg.cmake" )
@@ -17,8 +17,20 @@ find_package(pybind11 CONFIG REQUIRED)
 message(STATUS "Found pybind11 v${pybind11_VERSION}: ${pybind11_INCLUDE_DIRS} ${pybind11_DEFINITIONS} ${pybind11_LIBRARIES}")
 message(STATUS "Found Python ${PYTHON_LIBRARY_SUFFIX} in: ${PYTHON_PREFIX}: ${PYTHON_INCLUDE_DIRS} ${PYTHON_LIBRARIES} ${PYTHON_SITE_PACKAGES}")
 
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+	MESSAGE("Using Clang comiler")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+	MESSAGE("Using Gnu Complier")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+	MESSAGE("Using Intel complier")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+	MESSAGE("Using Microsoft Visual Studio Compiler")
+endif()
+
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-	add_compile_options(/bigobj /std:c++17)
+	add_compile_options(-std:c++17 -bigobj)
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+	add_compile_options(-fvisibility=hidden -std=c++17 -Wno-parentheses -Wno-undefined-var-template)
 else()
 	add_compile_options(-std=c++17)
 endif()

@@ -418,7 +418,7 @@ namespace sel {
 		virtual size_t default_inport() const { return 0; }
 		virtual size_t default_outport() const { return 0; }
 
-		virtual void freeze(void)
+		virtual void freeze(void) override
 		{
 			if (frozen)
 				return;

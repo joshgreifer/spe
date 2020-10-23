@@ -12,7 +12,7 @@ namespace sel {
 			public:
 				virtual const std::string type() const override { return "power spectral density"; }
 
-				void process()
+				void process() final
 				{
 					csamp_t *in_as_complex_array = (csamp_t *)this->in;
 					for (size_t i = 0; i < OUTW; ++i) {

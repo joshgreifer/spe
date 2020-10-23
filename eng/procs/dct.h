@@ -12,7 +12,7 @@ namespace sel {
 			public:
 				virtual const std::string type() const override { return "discrete cosine transform"; }
 
-				void process()
+				void process() final
 				{
 					for (size_t i = 0; i < SZ; i++)
 						this->out[i] = dctSignal[i] = this->in[i];

@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include "dictionary.h"
-#include "Ratio.h"
+#include "ratio.h"
 #include <vector>
 #include <initializer_list>
 

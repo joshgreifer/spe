@@ -2,7 +2,7 @@
 #include <limits>
 #include <complex>
 #include <vector>
-#include "Ratio.h"
+#include "ratio.h"
 
 //using namespace std;
 

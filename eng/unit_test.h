@@ -9,32 +9,78 @@
 
 // Access to python libs for unit tests
 #include "python.h"
+
+namespace sel {
+
+     struct unit_test {
+
+        bool run_and_store_results() {
+
+            std::cout << "UNIT TEST: " << name() << ": ";
+            try {
+                run();
+            } catch(std::exception &ex) { std::cerr << ex.what(); ++nfailed; }
+            if (nfailed)  {
+                std::cerr << "FAILED.\n";
+                return false;
+            } else if (verbose) {
+                if (nfailed == 0 && npassed == 0)
+                    std::cout << "NO TESTS IMPLEMENTED.\n";
+                else
+                    printf("\nPASSED. (%d assertion%s)\n", npassed, npassed == 1 ? "" : "s");
+
+            }  else
+                std::cout << "\n";
+            std::cout << "=====================================================\n\n";
+            return true;
+        }
+        virtual void run() = 0;
+        virtual const char *name() const = 0;
+        int npassed = 0;
+        int nfailed = 0;
+        bool verbose;
+
+        unit_test(bool verbose) : verbose(verbose) {}
+
+        virtual ~unit_test() = default;
+    };
+
+    struct test_suite {
+        std::vector<unit_test *>tests;
+        void add_test(unit_test *test) { tests.push_back(test); }
+        bool run_all() {
+            bool passed_all = true;
+            for (auto t : tests)
+                passed_all &= t->run_and_store_results();
+            return passed_all;
+        }
+    };
+
+}
+
 // Unit tests  need to be instantiated
 
-#define SEL_RUN_UNIT_TEST(TEST_NAME) TEST_NAME ## _ut::test TEST_NAME ## _ut_instance;
+#define SEL_UNIT_TEST_SUITE_BEGIN sel::test_suite suite = {}; bool verbose = true;
+
+#define SEL_UNIT_TEST_SUITE_RUN { \
+bool passed = suite.run_all(); \
+if (!passed)                      \
+std::cerr << "\n*** FAILED.";     \
+else                              \
+std::cerr << "\n*** PASSED."; }
+
+#define SEL_RUN_UNIT_TEST(TEST_NAME) suite.add_test(new TEST_NAME ## _ut::test(verbose));
 
 #define SEL_UNIT_TEST(TEST_NAME) \
 namespace  TEST_NAME ## _ut { \
-	struct test \
-	{ \
-		int npassed = 0; \
-		int nfailed = 0; \
-		test() \
-		{ \
-			std::cout << "UNIT TEST: " << #TEST_NAME << ": "; \
-			try { \
-			run(); \
-			} catch(std::exception &ex) { std::cout << ex.what(); } \
-			if (nfailed) std::cout << "FAILED.\n"; \
-			else if (nfailed == 0 && npassed == 0) std::cout << "NO TESTS IMPLEMENTED.\n"; \
-			else printf("\nPASSED. (%d assertion%s)\n", npassed, npassed == 1 ? "" : "s"); \
-			std::cout << "=====================================================\n\n"; \
-		}
+	struct test : sel::unit_test\
+	{                               \
+        const char *name() const final { return #TEST_NAME;  }                         \
+		test(bool verbose = true) : sel::unit_test(verbose) {}
 
 #define SEL_UNIT_TEST_END \
-	} \
-	; \
-} // unit_test
+	}; \
+} // namespace
 void SEL_UNIT_TEST_ITEM(const char* msg) {
 	printf(" %s...", msg);
 }

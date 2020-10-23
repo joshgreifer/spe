@@ -21,11 +21,11 @@ SEL_UNIT_TEST(melspec)
 	
 struct ut_traits
 {
-	static constexpr size_t n_filters = 80;
 	static constexpr size_t n_mels = 80;
 	static constexpr size_t input_frame_size = 1024;
 	static constexpr size_t input_fs = 16000;
 	static constexpr size_t overlap = 0;
+	static constexpr bool htk = false;
 	//static constexpr size_t signal_length = 2048;
 };
 
@@ -57,14 +57,12 @@ void run() {
 	auto& filters = melspec1.filterBank();
 
 
-	py::array_t<float> filters_py = librosa.attr("filters").attr("mel")(16000, 1024, "n_mels"_a = 80, "fmin"_a = 0, "fmax"_a = 8000, "htk"_a = true);
+	py::array_t<float> filters_py = librosa.attr("filters").attr("mel")(16000, 1024, "n_mels"_a = 80, "fmin"_a = 0, "fmax"_a = 8000, "htk"_a = ut_traits::htk);
 	auto filters_data = filters_py.data();
 	auto filters_size = filters_py.size();
 	
-	SEL_UNIT_TEST_ITEM("melspec.filterBank() filters size");
+	SEL_UNIT_TEST_ITEM("filter bank");
 	SEL_UNIT_TEST_ASSERT(filters_py.size() == filters.size())
-	
-	SEL_UNIT_TEST_ITEM("melspec.filterBank() filters data");
 	for (size_t i = 0; i < filters.size(); ++i)
 		SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(filters[i], filters_data[i])
 	
@@ -116,7 +114,7 @@ void run() {
 		"fmax"_a = ut_traits::input_fs / 2,
 		"center"_a = false,
 		"n_fft"_a = ut_traits::input_frame_size,
-		"htk"_a = true,  // This implementation only supports htk style mel banks
+		"htk"_a = ut_traits::htk,
 		"hop_length"_a = ut_traits::input_frame_size,
 		"power"_a = 1,
 		"window"_a = "hann"

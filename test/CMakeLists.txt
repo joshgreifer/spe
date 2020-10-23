@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.10)
 
 # set the project name
 #project(spe)
 
 #set(VCPKG_TARGET_TRIPLET x64-linux)
-set(CMAKE_TOOLCHAIN_FILE "/Users/josh/vcpkg/scripts/buildsystems/vcpkg.cmake" )
+#set(CMAKE_TOOLCHAIN_FILE "/Users/josh/vcpkg/scripts/buildsystems/vcpkg.cmake" )
 #set(PYTHONHOME "C:/ProgramData/MiniConda3")
 #set(PYTHONHPATH "C:/ProgramData/Miniconda3;c:/ProgramData/Miniconda3/DLLs")
 #set(PYTHON_EXECUTABLE:FILEPATH="C:/ProgramData/MiniConda3/python.exe")

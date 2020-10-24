@@ -98,7 +98,6 @@ int main(int argc, const char* argv[])
 
 	sel::eng::proc::numpy_file_writer<demo_traits::input_frame_size> numpy_writer_audio("test_audio_16k_i16.wav.npy");
 	sel::eng::proc::numpy_file_writer<demo_traits::n_mels> numpy_writer_mel("test_audio_16k_i16.mels.npy");
-	sel::eng::proc::numpy_file_writer<demo_traits::input_frame_size / 2 + 1> numpy_writer_mag("test_audio_16k_i16.mag.npy");
 	sel::eng::proc::numpy_file_writer<demo_traits::input_frame_size> numpy_writer_frames("test_audio_16k_i16.frames.npy");
 	sel::eng::proc::numpy_file_writer<demo_traits::input_frame_size> numpy_writer_random("test_audio_16k_i16.rng.npy");
 
@@ -113,8 +112,7 @@ int main(int argc, const char* argv[])
 	graph.connect(fft1, mag);
 	graph.connect(mag, mel);
 
-	// Write the mag and mels to numpy files
-	graph.connect(mag, numpy_writer_mag);
+	// Write the mels to numpy file
 	graph.connect(mel, numpy_writer_mel);
 	// Write out the audio and windowed frames to numpy files
 	graph.connect(wav_reader, numpy_writer_audio);

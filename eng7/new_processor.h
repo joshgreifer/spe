@@ -4,7 +4,7 @@
 #include "../eng/event.h"
 #include "../eng/func.h"
 
-
+#include <eigen3/Eigen/Core>
 namespace magic {
 	// From https://gist.github.com/sighingnow/505d3d5c82237741b4a18147b2f84811
 
@@ -43,6 +43,13 @@ namespace sel {
 			in_ports_t inports;
 			out_ports_t outports;
 
+//            void set_inputs_to_nullptr() {
+//                auto &f = [](const void *p) -> int { p = 0; return 0; };
+//                std::apply([f](auto&&... args) {(f(args), ...);}, inports);
+//            }
+//
+
+
 			template<size_t pin = 0, typename in_t=in_ports_t, class = typename std::enable_if<magic::is_tuple<in_t>::value>::type> auto& in() {
 				static_assert(has_inputs, "Processor has no inputs.");
 				return std::get<pin>(this->inports);
@@ -74,9 +81,9 @@ namespace sel {
 
 		};
 
-		template<size_t N_IN, size_t N_OUT>struct stdproc: processor7<
-			std::tuple< const std::array<samp_t, N_IN>*>,
-			std::tuple< std::array<samp_t, N_OUT> > >
+		template<size_t N_IN, size_t N_OUT, class input_t=samp_t, class output_t=samp_t>struct stdproc: processor7<
+			std::tuple< const std::array<input_t, N_IN>*>,
+			std::tuple< std::array<output_t, N_OUT> > >
 		{
 			static constexpr auto input_width = N_IN;
 
@@ -87,10 +94,10 @@ namespace sel {
 		};
 
 
-		template<size_t N_OUT>struct stdsource:
+		template<size_t N_OUT, class output_t=samp_t>struct stdsource:
 			processor7<
 			None,
-			std::tuple< std::array<samp_t, N_OUT> > >
+			std::tuple< std::array<output_t, N_OUT> > >
 		{
 			static constexpr auto input_width = 0;
             auto output_width() const
@@ -100,7 +107,7 @@ namespace sel {
 
 		};
 
-        template<>struct stdsource<dynamic_size_v>:
+        template<class output_t> struct stdsource<dynamic_size_v, output_t>:
                 processor7<
                         None,
                         std::tuple< std::vector<samp_t> > >
@@ -113,9 +120,9 @@ namespace sel {
 
         };
 
-		template<size_t N_IN>struct stdsink :
+		template<size_t N_IN, class input_t>struct stdsink :
 			processor7<
-			std::tuple< std::array<samp_t, N_IN> *>,
+			std::tuple< std::array<input_t, N_IN> *>,
 			None
 			>
 		{
@@ -128,7 +135,7 @@ namespace sel {
 
 		};
 
-		template<size_t OUTW>class data_source : public stdsource<OUTW>, public eng::semaphore {
+		template<size_t OUTW, class output_t>class data_source : public stdsource<OUTW, output_t>, public eng::semaphore {
 		public:
 			//				virtual const std::string type() const override { return "data_source"; }
 			data_source(rate_t expected_rate = rate_t()) : eng::semaphore(0, expected_rate) {}

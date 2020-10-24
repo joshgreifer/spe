@@ -16,13 +16,14 @@
 #include "../eng7/new_processor.h"
 #include "../eng7/procs/rand.h"
 #include "../eng7/procs/fir_filt.h"
-
+#include "../eng7/procs/fft.h"
 
 int main()
 {
 	SEL_UNIT_TEST_SUITE_BEGIN
 
-	SEL_RUN_UNIT_TEST(rand7)
+    SEL_RUN_UNIT_TEST(fft)
+    SEL_RUN_UNIT_TEST(rand7)
 	SEL_RUN_UNIT_TEST(fir_filt7)
 
     SEL_UNIT_TEST_SUITE_RUN

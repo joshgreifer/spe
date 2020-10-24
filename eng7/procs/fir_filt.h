@@ -83,7 +83,7 @@ void run()
 {
 
 	sel::eng7::proc::fir_filt<4> filt({-0.0696887105265845,	0.366902203216131,	0.366902203216131,	-0.0696887105265845 });
-	sel::eng7::proc::rand<sel::eng7::proc::fir_filt<4>::input_width> rng;
+	sel::eng7::proc::rand<1> rng;
 	rng.connect_to(filt);
 
 

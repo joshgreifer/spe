@@ -50,7 +50,7 @@ struct ut_traits
 std::array<samp_t, ut_traits::signal_length> matlab_results = { { 0.814723686393179,	0.905791937075619,	0.126986816293506,	0.913375856139019,	0.632359246225410,	0.0975404049994095,	0.278498218867048,	0.546881519204984,	0.957506835434298,	0.964888535199277 } };
 void run()
 {
-	auto& py_np_random = python::get().np.attr("random");
+	auto py_np_random = python::get().np.attr("random");
 	const auto seed = 5489U;
 	sel::eng7::proc::rand<ut_traits::signal_length> rng(seed);
 	rng.process();

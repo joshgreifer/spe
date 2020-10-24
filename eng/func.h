@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include <string>
+#include "object.h"
 namespace sel {
 
 	typedef std::function<void()> func;

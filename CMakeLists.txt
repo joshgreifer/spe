@@ -1,5 +1,7 @@
-cmake_minimum_required(VERSION 3.10)
-set(CMAKE_VERBOSE_MAKEFILE ON)
+cmake_minimum_required(VERSION 3.17)
 project(spe)
-add_subdirectory(test)
+
+set(CMAKE_CXX_STANDARD 17)
+
 add_subdirectory(demo)
+add_subdirectory(test)

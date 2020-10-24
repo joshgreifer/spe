@@ -20,6 +20,7 @@ struct demo_traits
 	static constexpr size_t hop_size = 256;
 	static constexpr size_t overlap = input_frame_size - hop_size;
 	static constexpr size_t n_mels = 80;
+	static constexpr bool htk = true;
 
 };
 

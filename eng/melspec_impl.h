@@ -100,57 +100,49 @@ private:
 	{
 		return (*weights_)[coeff * real_spectrum_length + specbin];
 	}
-    template<bool=htk>static internal_T frequency_to_mel_(internal_T frequency);
-
-    template<bool=htk>static internal_T mel_to_frequency(internal_T mel);
-
-    // Use HTK formula
-	template<>static internal_T frequency_to_mel_<true>(internal_T frequency)
-	{
-		return 2595.0 * log10(1.0 + frequency / 700.0);
-	}
-
-	// HTK
-    template<>static internal_T mel_to_frequency<true>(internal_T mel)
-	{
-		return 700.0 * (pow(10.0, mel / 2595.0) - 1.0);
-
-	}
-	// Slaney
-    template<>static internal_T frequency_to_mel_<false>(internal_T frequency)
-    {
+   static internal_T frequency_to_mel_(internal_T frequency)
+   {
+	    if constexpr (htk) {
+            return 2595.0 * log10(1.0 + frequency / 700.0);
+	    } else {
 // Fill in the linear part
-        auto f_min = 0.0;
-        auto f_sp = 200.0 / 3;
+            auto f_min = 0.0;
+            auto f_sp = 200.0 / 3;
 
-        auto mel = (frequency - f_min) / f_sp;
+            auto mel = (frequency - f_min) / f_sp;
 
 // Fill in the log-scale part
 
-        auto min_log_hz = 1000.0;  // beginning of log region (Hz)
-        auto min_log_mel = (min_log_hz - f_min) / f_sp;  // same (Mels)
-        auto log_step = std::log(6.4) / 27.0;  //step size for log region
+            auto min_log_hz = 1000.0;  // beginning of log region (Hz)
+            auto min_log_mel = (min_log_hz - f_min) / f_sp;  // same (Mels)
+            auto log_step = std::log(6.4) / 27.0;  //step size for log region
 
-        if (frequency >= min_log_hz)
-            return  min_log_mel + std::log(frequency / min_log_hz) / log_step;
-        return mel;
-    }
+            if (frequency >= min_log_hz)
+                return  min_log_mel + std::log(frequency / min_log_hz) / log_step;
+            return mel;
 
-    // Use Slaney formula
-    template<>static internal_T mel_to_frequency<false>(internal_T mel)
-    {
-        // Fill in the linear scale
-        auto f_min = 0.0;
-        auto f_sp = 200.0 / 3;
-        auto freq = f_min + f_sp * mel;
+	    }
+   }
+
+
+    static internal_T mel_to_frequency(internal_T mel) {
+        if constexpr (htk) {
+            return 700.0 * (pow(10.0, mel / 2595.0) - 1.0);
+        } else {
+            // Fill in the linear scale
+            auto f_min = 0.0;
+            auto f_sp = 200.0 / 3;
+            auto freq = f_min + f_sp * mel;
 
 // And now the nonlinear scale
-        auto min_log_hz = 1000.0; // beginning of log region (Hz)
-        auto min_log_mel = (min_log_hz - f_min) / f_sp; //same (Mels)
-        auto log_step = std::log(6.4) / 27.0;  // step size for log region
-        if (mel >= min_log_mel)
-            return min_log_hz * std::exp(log_step * (mel - min_log_mel));
-        return freq;
-    }
+            auto min_log_hz = 1000.0; // beginning of log region (Hz)
+            auto min_log_mel = (min_log_hz - f_min) / f_sp; //same (Mels)
+            auto log_step = std::log(6.4) / 27.0;  // step size for log region
+            if (mel >= min_log_mel)
+                return min_log_hz * std::exp(log_step * (mel - min_log_mel));
+            return freq;
+
+        }
+	}
 
 };

@@ -48,9 +48,22 @@ namespace sel {
 //                std::apply([f](auto&&... args) {(f(args), ...);}, inports);
 //            }
 //
+//            template <size_t I = 0, typename... Ts>
+//            void set_inputs_to_nullptr(std::tuple<Ts...> tup)
+//            {
+//                    std::get<I>(tup) = nullptr;
+//                    // Going for next element.
+//                    if  constexpr(I+1 < sizeof...(Ts))
+//                        set_inputs_to_nullptr<I + 1>(tup);
+//            }
 
+//            processor7()
+//            {
+////                if constexpr (has_inputs)
+////                    set_inputs_to_nullptr(inports);
+//            }
 
-			template<size_t pin = 0, typename in_t=in_ports_t, class = typename std::enable_if<magic::is_tuple<in_t>::value>::type> auto& in() {
+            template<size_t pin = 0, typename in_t=in_ports_t, class = typename std::enable_if<magic::is_tuple<in_t>::value>::type> auto& in() {
 				static_assert(has_inputs, "Processor has no inputs.");
 				return std::get<pin>(this->inports);
 			}

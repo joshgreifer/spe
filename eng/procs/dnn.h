@@ -31,7 +31,7 @@ namespace sel
 					for (size_t i = 0; i < OutW; ++i) 
 						this->out[i] = mat.template at<float>((int)i);
 				}
-				// default constuctor needed for factory creation
+				// default constructor needed for factory creation
 				explicit dnn() = default;
 
 				explicit dnn(const std::string& onnx_filename, const char*output_layer_name = "softmax") :

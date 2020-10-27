@@ -1,4 +1,5 @@
 #pragma once
+#include "../quick_queue.h"
 #include "../processor.h"
 #include "../input_stream.h"
 

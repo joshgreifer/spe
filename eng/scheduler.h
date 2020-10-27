@@ -426,7 +426,7 @@ namespace sel {
 				asio_scheduler::get().stop();
 #endif
 
-
+                clear();
 			}
 
 		};

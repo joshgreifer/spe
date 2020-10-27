@@ -1,5 +1,6 @@
 #pragma once
 #include "../processor.h"
+#include "../numpy.h"
 /*
  * Saves output as numpy file 2d array,  shape [ArrayWidth,  n]
  */
@@ -10,18 +11,20 @@ namespace sel
 		namespace proc
 		{
 
-			template<size_t ArrayWidth>class numpy_file_writer : public sel::eng::Processor1A0<ArrayWidth>
+			template<class data_t, size_t ArrayWidth, size_t max_rows = 1000000>class numpy_file_writer : public sel::eng::Processor1A0<ArrayWidth>
 			{
-				std::vector<samp_t> v;
+				std::vector<data_t> v;
 
 				const std::string file_name;
+				size_t rows_acquired  = 0;
 				
 			public:
 				void process() final
 				{
 
-					for (size_t i = 0; i < ArrayWidth; ++i)
-						v.push_back(this->in[i]);
+                    if (++rows_acquired <= max_rows)
+                        for (size_t i = 0; i < ArrayWidth; ++i)
+						    v.push_back(static_cast<data_t>(this->in[i]));
 
 				}
 
@@ -38,3 +41,4 @@ namespace sel
 		}
 	}
 }
+

@@ -59,7 +59,7 @@ void run() {
 
 	py::array_t<float> filters_py = librosa.attr("filters").attr("mel")(16000, 1024, "n_mels"_a = 80, "fmin"_a = 0, "fmax"_a = 8000, "htk"_a = ut_traits::htk);
 	auto filters_data = filters_py.data();
-	auto filters_size = filters_py.size();
+//	auto filters_size = filters_py.size();
 	
 	SEL_UNIT_TEST_ITEM("filter bank");
 	SEL_UNIT_TEST_ASSERT(filters_py.size() == filters.size())
@@ -74,6 +74,7 @@ void run() {
 	mag mag1;
 
 	sel::eng::scheduler& s = sel::eng::scheduler::get();
+	s.clear();
 	
 	sel::eng::proc::processor_graph graph(s);
 	graph.connect(rng1, window1);

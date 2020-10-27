@@ -1,7 +1,27 @@
 #pragma once
+#ifndef SPE_NUMPY_H
+#define SPE_NUMPY_H
+#include <fcntl.h>
+#ifdef _WIN32
+#ifndef _CRT_NONSTDC_NO_DEPRECATE
+    #define _CRT_NONSTDC_NO_DEPRECATE
+#endif
+#include <io.h>
+#else
+    #include <sys/types.h>
+    #include <sys/stat.h>
+    #include <unistd.h>
+    #define tell(fd) lseek(fd, 0, SEEK_CUR)
+    #define O_BINARY 0 /* Not available in Linux */
+#endif
 #include <vector>
 #include <string>
-#include "unit_test.h"
+#include "msg_and_error.h"
+
+template<typename T>
+struct is_complex_t : public std::false_type {};
+template<typename T>
+struct is_complex_t<std::complex<T>> : public std::true_type {};
 
 namespace sel {
 	namespace numpy
@@ -51,18 +71,20 @@ namespace sel {
 			return linspaced;
 		}
 
-		template<class N, bool = std::is_arithmetic<N>::value>
-		class np_type
-		{
-			static N t;
-			bool isSigned = std::is_signed<N>::value;
-			char sizeChar = '0' + sizeof(t);
-			bool isIntegral = std::is_integral<N>::value;
-			char type = isIntegral ?
-				(sizeof(t) == 1 ? (isSigned ? 'b' : 'B') : 'i') : 'f';
-		public:
-			const char value[4] = { '<', type, sizeChar, '\0' };
-		};
+        template<class N, bool = std::is_arithmetic<N>::value>
+        class np_type
+        {
+            static N t;
+            bool isComplex = is_complex_t<N>::value;
+            bool isSigned = std::is_signed<N>::value;
+            char sizeChar = '0' + sizeof(t);
+            bool isIntegral = std::is_integral<N>::value;
+            char type = isIntegral ?
+                        (sizeof(t) == 1 ? (isSigned ? 'b' : 'B') : 'i') : isComplex ? 'c' : 'f';
+            charbuf_short buf;
+        public:
+            const char *value = buf.sprintf("<%c%d", type, static_cast<unsigned int>(sizeof(t)));
+        };
 		/**
 		 * Save
 		 */
@@ -74,8 +96,7 @@ namespace sel {
 			const char *type = t.value;
 			const char* magic = "\x93NUMPY";
 			const size_t header_len = 128;
-	
-			
+
 			std::string shape_str = "(";
 			size_t n_values = 1;
 			for (auto dim : shape) {
@@ -111,21 +132,42 @@ namespace sel {
 			
 		}
 
+        template<class N, std::enable_if_t<std::is_arithmetic<N>::value, int> = 0>
+        std::vector<N>  load(const char *file_name)
+        {
+            std::vector<N>dest = {};
+            const char* magic = "\x93NUMPY";
+            struct stat status;
+            if (stat(file_name, &status) < 0)
+                throw std::runtime_error("Couldn't stat() numpy file.");
+            auto fd  = open(file_name, O_RDONLY + O_BINARY);
 
-		
+            if (fd < 0)
+                throw std::runtime_error("Couldn't open numpy file.");
+
+            constexpr size_t pre_header_length = 10;
+            char buf[pre_header_length];
+
+            if (pre_header_length != read(fd, buf, pre_header_length ))
+                throw std::runtime_error("Not a numpy file (couldn't read header");
+            if (strncmp(buf, magic, strlen(magic)))
+                throw std::runtime_error("Not a numpy file (magic value missing)");
+
+            auto header_len = static_cast<size_t>(buf[8]) + 256 * static_cast<size_t>(buf[9]);
+            auto start_of_data = pre_header_length + header_len;
+            auto data_len = status.st_size - start_of_data;
+
+            dest.resize(data_len / sizeof(N));
+            lseek(fd, start_of_data, SEEK_SET);
+            // Read entire file into memory
+            read(fd, reinterpret_cast<char *>(dest.data()), data_len);
+            close(fd);
+            return dest;
+
+        }
 	}
 }
 #if defined(COMPILE_UNIT_TESTS)
-SEL_UNIT_TEST(numpy)
-void run() {
-	std::vector<int>shape = { 2, 3, 4 };
-	double data[2 * 3 * 4] = {};
-	int d = 0;
-	for (auto& c : data)
-		c = d++;
-	
-	sel::numpy::save<double>(data, "test.npy", shape);
-	SEL_UNIT_TEST_ASSERT(true);
-}
-SEL_UNIT_TEST_END
+#include "procs/numpy_ut.h"
+#endif
 #endif

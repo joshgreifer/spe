@@ -1,6 +1,9 @@
 #pragma once
 
 #include <cmath>
+#include <vector>
+#include <array>
+#include "../eng/numpy.h"
 /**
 	MEL spectrum implementation, derived from librosa's implementation.
 	Given an fft magnitude spectrum, it produces a mel-scaled spectrum.
@@ -38,6 +41,9 @@ template<class T, unsigned int sr, unsigned int nMels, unsigned int nFft, bool H
 
 	
 public:
+
+    using Ptr = std::shared_ptr<const melspec_impl>;
+
 	melspec_impl() : weights_( new std::array<double, nMels * real_spectrum_length>())
 	{
 		

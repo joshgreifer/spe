@@ -5,3 +5,5 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_subdirectory(demo)
 add_subdirectory(test)
+
+add_subdirectory(pix2pix)

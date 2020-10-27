@@ -81,7 +81,7 @@ namespace sel {
             bool isIntegral = std::is_integral<N>::value;
             char type = isIntegral ?
                         (sizeof(t) == 1 ? (isSigned ? 'b' : 'B') : 'i') : isComplex ? 'c' : 'f';
-            charbuf_short buf;
+            charbuf<4> buf;
         public:
             const char *value = buf.sprintf("<%c%d", type, static_cast<unsigned int>(sizeof(t)));
         };
@@ -160,7 +160,8 @@ namespace sel {
             dest.resize(data_len / sizeof(N));
             lseek(fd, start_of_data, SEEK_SET);
             // Read entire file into memory
-            read(fd, reinterpret_cast<char *>(dest.data()), data_len);
+            if (read(fd, reinterpret_cast<char *>(dest.data()), data_len) != data_len)
+                throw std::runtime_error("Couldn't read all data.");
             close(fd);
             return dest;
 

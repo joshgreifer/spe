@@ -35,21 +35,29 @@ int main()
 
 
         auto x = cv::dnn::blobFromImages(x_cvmat);
+        std::cout << "*** Running inference with batch size " <<  x_vec.size() / 80 / 80 << "...";
         net.setInput(x);
         auto x_hat_cvmat = net.forward();
 
-        std::cout << "Output size:" <<  x_hat_cvmat.size;
+        std::cout << " done. Output size:" <<  x_hat_cvmat.size << '\n';
 
         // compare
         bool eq = std::equal(x_hat_cvmat.begin<float>(), x_hat_cvmat.end<float>(), x_hat_pytorch_cvmat.begin<float>());
         const float *x_cv_data = reinterpret_cast<float *>(x_hat_cvmat.data);
         const float *x_py_data = reinterpret_cast<float *>(x_hat_pytorch_cvmat.data);
+        size_t n_diffs = 0;
         for (size_t i = 0; i < x_vec.size(); ++i) {
             const auto x_py = x_cv_data[i];
             const auto x_cv = x_py_data[i];
-            std::cout << i << ": " << x_cv << ", " << x_py << '\n';
+            if (abs(x_py - x_cv) > 1e-5) {
+                ++n_diffs;
+                std::cerr << i << ": " << x_cv << ", " << x_py << '\n';
+            }
         }
-
+        if (n_diffs == 0)
+            std::cout << "*** No differences.\n";
+        else
+            std::cout << "*** " << n_diffs  << " difference" << (n_diffs == 1 ? ".\n" : "s.\n");
     } catch (std::exception &ex) {
         std::cerr << ex.what();
     }

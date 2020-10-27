@@ -32,55 +32,6 @@ using mag = sel::eng::proc::mag<demo_traits>;
 using mel = sel::eng::proc::melspec<demo_traits>;
 
 
-
-int main_old(int argc, const char *argv[])
-{
-	const char* file_name = argc > 1 ? argv[1] : "test_audio_16k_i16.wav";
-	sel::eng::scheduler s = {};
-
-	sel::eng::proc::compound_processor input_proc;
-	sel::eng::proc::compound_processor output_proc;
-
-	wav_reader wav_reader(file_name);
-	no_window window;
-	fft fft;
-	mag mag;
-	mel mel;
-	sel::eng::proc::matlab_file_output mat("mels.mat");
-	
-	sel::eng::proc::numpy_file_writer<demo_traits::input_frame_size> numpy_writer_audio("test_audio_16k_i16.wav.npy");
-	sel::eng::proc::numpy_file_writer<demo_traits::n_mels> numpy_writer_mel("test_audio_16k_i16.mels.npy");
-	sel::eng::proc::numpy_file_writer<demo_traits::input_frame_size / 2 + 1> numpy_writer_mag("test_audio_16k_i16.mag.npy");
-	sel::eng::proc::numpy_file_writer<demo_traits::input_frame_size> numpy_writer_frames("test_audio_16k_i16.frames.npy");
-
-	auto& win_out = window.output_proc();
-	input_proc.connect_procs(wav_reader, window.input_proc());
-	output_proc.connect_procs(window.output_proc(), fft);
-	output_proc.connect_procs(fft, mag);
-	output_proc.connect_procs(mag, mel);
-	
-	// Write the mag and mels to numpy files
-	output_proc.connect_procs(mag, numpy_writer_mag);
-	output_proc.connect_procs(mel, numpy_writer_mel);
-	// Write out the audio and windowed frames to numpy files
-	input_proc.connect_procs(wav_reader, numpy_writer_audio);
-	output_proc.connect_procs(win_out, numpy_writer_frames);
-	
-	sel::eng::schedule input_schedule(&wav_reader, input_proc);
-	sel::eng::schedule output_schedule(&window, output_proc);
-	
-
-	s.add(input_schedule);
-	output_schedule.init();
-	//s.add(output_schedule);
-
-
-	s.run();
-	output_schedule.term();
-
-	return 0;
-}
-
 int main(int argc, const char* argv[])
 {
 	const char* file_name = argc > 1 ? argv[1] : "test_audio_16k_i16.wav";
@@ -96,10 +47,10 @@ int main(int argc, const char* argv[])
 	mel mel;
 	sel::eng::proc::matlab_file_output mat("mels.mat");
 
-	sel::eng::proc::numpy_file_writer<demo_traits::input_frame_size> numpy_writer_audio("test_audio_16k_i16.wav.npy");
-	sel::eng::proc::numpy_file_writer<demo_traits::n_mels> numpy_writer_mel("test_audio_16k_i16.mels.npy");
-	sel::eng::proc::numpy_file_writer<demo_traits::input_frame_size> numpy_writer_frames("test_audio_16k_i16.frames.npy");
-	sel::eng::proc::numpy_file_writer<demo_traits::input_frame_size> numpy_writer_random("test_audio_16k_i16.rng.npy");
+	sel::eng::proc::numpy_file_writer<samp_t, demo_traits::input_frame_size> numpy_writer_audio("test_audio_16k_i16.wav.npy");
+	sel::eng::proc::numpy_file_writer<samp_t, demo_traits::n_mels> numpy_writer_mel("test_audio_16k_i16.mels.npy");
+	sel::eng::proc::numpy_file_writer<samp_t, demo_traits::input_frame_size> numpy_writer_frames("test_audio_16k_i16.frames.npy");
+	sel::eng::proc::numpy_file_writer<samp_t, demo_traits::input_frame_size> numpy_writer_random("test_audio_16k_i16.rng.npy");
 
 	sel::eng::proc::rand<demo_traits::input_frame_size> rng;
 	rng.raise(1);  // Run once only

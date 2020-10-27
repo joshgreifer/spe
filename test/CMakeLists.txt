@@ -45,8 +45,8 @@ set_property(TARGET spe_test6 PROPERTY CXX_STANDARD_REQUIRED ON)
 set_property(TARGET spe_test7 PROPERTY CXX_STANDARD 17)
 set_property(TARGET spe_test7 PROPERTY CXX_STANDARD_REQUIRED ON)
 
-file(COPY artefacts/dnn_ut.onnx DESTINATION .)
-file(COPY artefacts/test_audio_16k_i16.wav DESTINATION .)
+file(GLOB ARTEFACTS artefacts/*)
+file(COPY ${ARTEFACTS} DESTINATION .)
 
 target_link_libraries( spe_test6 PRIVATE opencv_dnn opencv_core pybind11::embed pybind11::module pybind11::pybind11)
 target_link_libraries( spe_test7 PRIVATE opencv_dnn opencv_core pybind11::embed pybind11::module pybind11::pybind11)

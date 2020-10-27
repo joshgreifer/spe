@@ -28,7 +28,8 @@ endif()
 
 add_executable(pix2pix_test pix2pix_test.cpp)
 
-file(COPY artefacts/netG.onnx DESTINATION .)
-file(COPY artefacts/dnn_ut.onnx DESTINATION .)
+file(GLOB ARTEFACTS artefacts/*)
+file(COPY ${ARTEFACTS} DESTINATION .)
+
 target_link_libraries( pix2pix_test PRIVATE opencv_dnn opencv_core)
 

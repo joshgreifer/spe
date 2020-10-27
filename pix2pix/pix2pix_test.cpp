@@ -1,6 +1,7 @@
 //
 // Created by josh on 26/10/2020.
 //
+#include <iostream>
 #include <opencv2/core.hpp>
 
 #include <opencv2/dnn/dnn.hpp>
@@ -17,24 +18,38 @@ int main()
         MelSpec::Ptr melspec;
         cv::dnn::Net net = cv::dnn::readNetFromONNX(onnx_filename);
 
-        std::vector<int> input_shape = {80, 80};
 
-        std::cout << "[\n";
+//        std::cout << "[\n";
 //    for (auto layer_id  = 0; layer_id < num_layers; ++layer_id) {
 //        auto layer = net.getLayer(layer_id);
 //        std::cout << '\t' << layer->name << ":\t";
 //        std::cout << layer->type << '\n';
 //    }
 //    std::cout << "]\n";
-        cv::Mat input_data(input_shape, CV_32FC1);
+        auto x_vec = sel::numpy::load<float>(std::string(onnx_filename + ".x.npy").c_str());
+        auto x_hat_vec = sel::numpy::load<float>(std::string(onnx_filename + ".x_hat.npy").c_str());
+        std::vector<int> input_shape = {static_cast<int>(x_vec.size() / 80 / 80), 80, 80};
 
-//    for (auto& v: this->inports[0]->as_vector())
-//        fv.push_back(static_cast<float>(v));
-        auto blob = cv::dnn::blobFromImage(input_data);
-        net.setInput(blob);
-        auto mat = net.forward();
-        auto mat2 = mat;
-        std::cout << "Output size:" <<  mat.size;
+        cv::Mat x_cvmat(input_shape, CV_32FC1, x_vec.data());
+        cv::Mat x_hat_pytorch_cvmat(input_shape, CV_32FC1, x_hat_vec.data());
+
+
+        auto x = cv::dnn::blobFromImages(x_cvmat);
+        net.setInput(x);
+        auto x_hat_cvmat = net.forward();
+
+        std::cout << "Output size:" <<  x_hat_cvmat.size;
+
+        // compare
+        bool eq = std::equal(x_hat_cvmat.begin<float>(), x_hat_cvmat.end<float>(), x_hat_pytorch_cvmat.begin<float>());
+        const float *x_cv_data = reinterpret_cast<float *>(x_hat_cvmat.data);
+        const float *x_py_data = reinterpret_cast<float *>(x_hat_pytorch_cvmat.data);
+        for (size_t i = 0; i < x_vec.size(); ++i) {
+            const auto x_py = x_cv_data[i];
+            const auto x_cv = x_py_data[i];
+            std::cout << i << ": " << x_cv << ", " << x_py << '\n';
+        }
+
     } catch (std::exception &ex) {
         std::cerr << ex.what();
     }

@@ -1,3 +1,9 @@
+//
+// Created by josh on 30/10/2020.
+//
+
+#ifndef SPE_WAV_FILE_READER_H
+#define SPE_WAV_FILE_READER_H
 #pragma once
 #include "../processor.h"
 #include "data_source.h"
@@ -10,7 +16,7 @@ namespace sel
         namespace proc
         {
 
-            template<class data_t, size_t ArrayWidth>class numpy_file_reader : public data_source<ArrayWidth>
+            template<class data_t, size_t nChannels, size_t ArrayWidth>class numpy_file_reader : public Processor<0, nChannels>
             {
                 std::vector<data_t> v;
 
@@ -33,7 +39,7 @@ namespace sel
                 numpy_file_reader(const std::string& file_name) : file_name(file_name)
                 {
                     // Load the numpy data
-                   v = sel::numpy::load<data_t>(file_name.c_str());
+                    v = sel::numpy::load<data_t>(file_name.c_str());
                     rows_in_file = v.size() / ArrayWidth;
                     if (rows_in_file *  ArrayWidth != v.size())
                         throw eng_ex("Numpy file does not contain a whole number of rows. Shape is incorrect");
@@ -46,3 +52,4 @@ namespace sel
         }
     }
 }
+#endif //SPE_WAV_FILE_READER_H

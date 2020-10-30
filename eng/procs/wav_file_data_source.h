@@ -2,7 +2,7 @@
 #include <cinttypes>
 #include "data_source.h"
 #include "../file_input_stream.h"
-
+#include "../wavfile.h"
 namespace {
 
 	typedef int16_t SAMP16;
@@ -83,7 +83,7 @@ namespace {
 
 	struct RIFFHeader
 	{
-		RIFFId IdRIFF; // 'RIFF'
+		RIFFId chunk_id; // 'RIFF'
 		int szRIFF;
 		RIFFId RiffFormat;  // 'WAVE' -- means two subchunks, 'fmt ' and 'data'
 
@@ -96,17 +96,17 @@ namespace {
 		short BlockAlign;
 		short BitsPerSample;
 
-		RIFFHeader() : IdRIFF("RIFF"),
-			szRIFF(0),
-			RiffFormat("WAVE"),
-			IdFmt("fmt "),
-			szFmt(16),
-			AudioFormat(1),
-			NumChannels(1),
-			SampleRate(16000),
-			ByteRate(0),
-			BlockAlign(0),
-			BitsPerSample(16)
+		RIFFHeader() : chunk_id("RIFF"),
+                       szRIFF(0),
+                       RiffFormat("WAVE"),
+                       IdFmt("fmt "),
+                       szFmt(16),
+                       AudioFormat(1),
+                       NumChannels(1),
+                       SampleRate(16000),
+                       ByteRate(0),
+                       BlockAlign(0),
+                       BitsPerSample(16)
 		{
 		}
 
@@ -185,83 +185,19 @@ namespace sel {
 
 				file_descriptor ParseHeader() {
 
-					RIFFHeader header;
-					DATAChunk data;
-
 					file_descriptor fd = open(filename_, O_RDONLY + O_BINARY);
 
-					try {
-						if (-1 == fd)
-							throw sys_ex();
+                    char buf[sizeof(wav::wav_file_header)];
+                    if (!read(fd, buf, sizeof(buf)))
+                        throw sys_ex();
 
-						if (!read(fd, &header, sizeof(header)))
-							throw sys_ex();
+                    wav::wav_file_header header = wav::wav_file_header::from_bytes(buf);
 
+                    datastart = tell(fd);
 
-						if (header.IdRIFF != "RIFF")
-							throw eng_ex("WAV File format is incorrect. (Missing 'RIFF' chunk).");
+                    numChannels = header.NumChannels;
 
-						if (header.RiffFormat != "WAVE")
-							throw eng_ex("WAV File format is incorrect. (Format is not 'WAVE').");
-
-						if (header.IdFmt != "fmt ")
-							throw eng_ex("WAV File format is incorrect. (Missing 'fmt ' chunk).");
-
-
-
-						if (header.AudioFormat != 1) // PCM
-							throw eng_ex("The WAV file is not PCM format.");
-
-
-						if (header.BitsPerSample != 16)
-
-							throw eng_ex("Can only read 16 bit wav files.");
-
-						this->fs_ = header.SampleRate;
-
-						this->numChannels = header.NumChannels;
-#if SUPPORTS_STEREO
-						if this->numChannels > 2)
-						throw eng_ex("WAV File has more than 2 audio channels.");
-#else
-						if (this->numChannels > 1)
-							throw eng_ex("WAV File has more than 1 audio channel.");
-#endif
-
-						if (header.szFmt == 16) { // should be 'data' chunk next
-							;
-						}
-						else {
-							// scan to end of fmt chunk
-							lseek(fd, header.szFmt - 16, SEEK_CUR);
-						}
-						// repeatedly next chunks into struct, assume it's a data chunk.
-						do {
-							if (!read(fd, &data, sizeof(data)))
-								throw sys_ex();
-							if (data.IdData == "data")
-								break;
-							lseek(fd, data.szData, SEEK_CUR); // not 'data', skip chunk
-
-						} while (true); // skip non-data chunks
-
-
-
-
-						if (data.IdData != "data")
-							throw eng_ex("WAV File format is incorrect. (Missing 'data' chunk).");
-
-						datastart = tell(fd);
-
-
-						this->totDuration = (8 * (double)data.szData / (header.BitsPerSample * header.NumChannels)) / this->fs_;
-
-					}
-					catch (eng_ex& ex) {
-
-						if (fd > 0) close(fd);
-						throw ex;
-					}
+                    totDuration = (8 * (double)header.dataChunk.szData / (header.BitsPerSample * header.NumChannels)) / fs_;
 
 					return fd; // return file pointer, pointing at start of data
 				}

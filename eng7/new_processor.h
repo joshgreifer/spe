@@ -133,7 +133,7 @@ namespace sel {
 
         };
 
-		template<size_t N_IN, class input_t>struct stdsink :
+		template<size_t N_IN, class input_t=samp_t>struct stdsink :
 			processor7<
 			std::tuple< std::array<input_t, N_IN> *>,
 			None

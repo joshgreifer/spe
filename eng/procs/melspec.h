@@ -26,7 +26,7 @@ namespace sel {
 				void process() final {
 					auto spectrum = this->in;
 					auto coeffs = this->out;
-					impl_.calculateMelFrequencySpectrum(spectrum, coeffs);
+                    impl_.fft_mag2mel(spectrum, coeffs);
 					
 
 				}

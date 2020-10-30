@@ -3,6 +3,7 @@
 #include <cmath>
 #include <vector>
 #include <array>
+#include "../eng/array2d.h"
 #include "../eng/numpy.h"
 /**
 	MEL spectrum implementation, derived from librosa's implementation.
@@ -17,7 +18,7 @@
 	float fft_mag[257];  // fft magnitude
 	float mel[80];	// output mel
 
-	m.calculateMelFrequencySpectrum(fft_mag, mel);
+	m.fft_mag2mel(fft_mag, mel);
 
 	This is gives the same results as
 	mel_filterbank = librosa.filters.mel(16000, 512, n_mels=80, fmin=0, fmax=8000, htk=True)
@@ -30,6 +31,11 @@ template<class T, unsigned int sr, unsigned int nMels, unsigned int nFft, bool H
 	static constexpr internal_T nyquist_frequency = sr / 2.0;
 	static constexpr bool htk = Htk;
 
+	using weights_t = sel::array2d<internal_T, nMels,real_spectrum_length>;
+    mutable weights_t *weights_;
+    weights_t& weights;
+
+
 	std::vector<internal_T> calc_mel_frequencies(size_t n_mels = nMels + 2, internal_T fmin = 0, internal_T fmax = nyquist_frequency)
 	{
 		auto min_mel = frequency_to_mel_(fmin);
@@ -41,10 +47,10 @@ template<class T, unsigned int sr, unsigned int nMels, unsigned int nFft, bool H
 
 	
 public:
-
+   // std::move(*std::make_unique<T>()
     using Ptr = std::shared_ptr<const melspec_impl>;
 
-	melspec_impl() : weights_( new std::array<double, nMels * real_spectrum_length>())
+	melspec_impl() : weights_(new weights_t), weights(*weights_)
 	{
 		
 		auto mel_f = calc_mel_frequencies();
@@ -70,7 +76,7 @@ public:
 				auto w = std::max(0.0, std::min(lower, upper));
 				// Slaney normalization
 				w *= enorm;
-				weights(i, j) = w;
+                weights(i, j) = w;
 			}
 		}
 		//calculate_mel_filter_bank_();
@@ -80,7 +86,8 @@ public:
 	{
 		delete weights_;
 	}
-	void calculateMelFrequencySpectrum(const T* inputMagnitudeSpectrum, T *outputMelFrequencySpectrum)
+
+	void fft_mag2mel(const T* inputMagnitudeSpectrum, T *outputMelFrequencySpectrum)
 
 	{
 		for (int i = 0; i < nMels; ++i)
@@ -96,16 +103,16 @@ public:
 	}
 
 	const auto& filterBank() const {
-		return *weights_;
+		return weights;
 	}
 private:
 
-	mutable std::array<internal_T, nMels * real_spectrum_length> *weights_;
+
 	
-	internal_T& weights(size_t coeff, size_t specbin) const
-	{
-		return (*weights_)[coeff * real_spectrum_length + specbin];
-	}
+//	internal_T& weights(size_t coeff, size_t specbin) const
+//	{
+//		return (*weights_)[coeff * real_spectrum_length + specbin];
+//	}
    static internal_T frequency_to_mel_(internal_T frequency)
    {
 	    if constexpr (htk) {

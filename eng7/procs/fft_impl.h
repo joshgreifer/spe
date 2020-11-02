@@ -11,16 +11,17 @@
  using template metaprogramming
 
  ***************************************************************************/
-
+#pragma once
 #include <iostream>
 #include <iomanip>
 
 
 #include <cmath>
+
 #ifndef M_PI
-#define M_PI 3.14159265358979323846264338327950288419716939937510582097494459230781640628620899863
+#define M_PI 3.14159265358979323846
 #endif
-using namespace std;
+
 
 
 ////// template class SinCosSeries
@@ -173,8 +174,8 @@ class GFFT {
      unsigned i,m,j=1;
      for (i=1; i<2*N; i+=2) {
         if (j>i) {
-            swap(data[j-1], data[i-1]);
-            swap(data[j], data[i]);
+            std::swap(data[j-1], data[i-1]);
+            std::swap(data[j], data[i]);
         }
         m = N;
         while (m>=2 && j>m) {

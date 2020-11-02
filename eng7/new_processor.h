@@ -43,25 +43,6 @@ namespace sel {
 			in_ports_t inports;
 			out_ports_t outports;
 
-//            void set_inputs_to_nullptr() {
-//                auto &f = [](const void *p) -> int { p = 0; return 0; };
-//                std::apply([f](auto&&... args) {(f(args), ...);}, inports);
-//            }
-//
-//            template <size_t I = 0, typename... Ts>
-//            void set_inputs_to_nullptr(std::tuple<Ts...> tup)
-//            {
-//                    std::get<I>(tup) = nullptr;
-//                    // Going for next element.
-//                    if  constexpr(I+1 < sizeof...(Ts))
-//                        set_inputs_to_nullptr<I + 1>(tup);
-//            }
-
-//            processor7()
-//            {
-////                if constexpr (has_inputs)
-////                    set_inputs_to_nullptr(inports);
-//            }
 
             template<size_t pin = 0, typename in_t=in_ports_t, class = typename std::enable_if<magic::is_tuple<in_t>::value>::type> auto& in() {
 				static_assert(has_inputs, "Processor has no inputs.");
@@ -89,10 +70,17 @@ namespace sel {
 				static_assert(TO_PROC::has_inputs, "Can't connect: 'to' Processor has no inputs.");
 				static_assert(has_outputs, "Can't connect: 'from' Processor has no outputs.");
 
-				to.template in<to_pin>() = &this->out<from_pin>();
+                to.template in<to_pin>() = &this->out<from_pin>();
 			}
 
+//            template<size_t from_pin = 0> void connect_to_const(std::tuple_element_t<from_pin, out_ports_t>* to) {
+//                static_assert(has_outputs, "Can't connect: 'from' Processor has no outputs.");
+//
+//                to = &this->out<from_pin>();
+//            }
+
 		};
+
 
 		template<size_t N_IN, size_t N_OUT, class input_t=samp_t, class output_t=samp_t>struct stdproc: processor7<
 			std::tuple< const std::array<input_t, N_IN>*>,

@@ -18,6 +18,7 @@
 #include "../eng7/procs/fir_filt.h"
 #include "../eng7/procs/fft.h"
 #include "../eng7/procs/numpy_ut.h"
+#include "../eng7/procs/window_ut.h"
 int main()
 {
 	SEL_UNIT_TEST_SUITE_BEGIN
@@ -25,7 +26,8 @@ int main()
 //    SEL_RUN_UNIT_TEST(fft)
 //    SEL_RUN_UNIT_TEST(rand7)
 //	SEL_RUN_UNIT_TEST(fir_filt7)
-    SEL_RUN_UNIT_TEST(numpy7)
+//    SEL_RUN_UNIT_TEST(numpy7)
+    SEL_RUN_UNIT_TEST(window7)
     SEL_UNIT_TEST_SUITE_RUN
 	return 0;
 }

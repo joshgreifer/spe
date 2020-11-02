@@ -59,9 +59,9 @@ namespace sel
             {
                 dag<processor>dag_;		// for sorting
 
-                bool is_added(processor *proc) {
-                    return std::find(begin(), end(), proc) != end();
-                }
+//                bool is_added(processor *proc) {
+//                    return std::find(begin(), end(), proc) != end();
+//                }
 
                 void add_edge(processor &from, processor &to)
                 {
@@ -71,27 +71,27 @@ namespace sel
                         throw sp_ex_cycle();
                 }
 
-                bool add_node(processor& proc)
-                {
-                    if (!is_added(&proc)) {
-                        push_back(&proc);
-                        return true;
-                    }
-                    return false;
-
-                }
-
-                // If node is a DAG, add its sub-processors
-                bool add_node(processor_dag& proc)
-                {
-                    bool ret = true;
-                    //for (ConnectableProcessor * p : proc)
-                    //	ret &= add_node(*p);
-                    for (auto& edge : proc.dag_.edges)
-                        add_edge(*edge.first, *edge.second);
-                    return ret;
-
-                }
+//                bool add_node(processor& proc)
+//                {
+//                    if (!is_added(&proc)) {
+//                        push_back(&proc);
+//                        return true;
+//                    }
+//                    return false;
+//
+//                }
+//
+//                // If node is a DAG, add its sub-processors
+//                bool add_node(processor_dag& proc)
+//                {
+//                    bool ret = true;
+//                    //for (ConnectableProcessor * p : proc)
+//                    //	ret &= add_node(*p);
+//                    for (auto& edge : proc.dag_.edges)
+//                        add_edge(*edge.first, *edge.second);
+//                    return ret;
+//
+//                }
 
             public:
 
@@ -131,39 +131,42 @@ namespace sel
                     // if 'from' is not rate-triggering,  find the fiber containing it.  If found, fiber_containing_from.connect_procs()
                     //		if not found, look for 'to' proc,  and do fiber_containing_to.connect_procs()
                     //			if *still* not found, create a new fiber,  and do new_fiber.connect_procs()
-                    auto sem = dynamic_cast<eng::semaphore*>(&from);
-                    fiber* fib = nullptr;
-                    if (sem)  // 'from' is rate-triggering
-                    {
-                        fib = sem_map[sem];
-                        if (!fib) {
-                            fib = sem_map[sem] = new fiber;
-                            // create a new schedule
-                            s_.add(sem, *fib);
-                        }
-                        // 'to' belongs to same fiber as 'from'
 
-                        proc_map[&to] = fib;
-
-                    } else // 'from' is not rate-triggering, get its fiber
-                    {
-                        fib = proc_map[&from];
-                        if (!fib) // no fiber, see if 'to''s fiber is registered
+                        auto sem = dynamic_cast<eng::semaphore *>(&from);
+                        fiber *fib = nullptr;
+                        if (sem)  // 'from' is rate-triggering
                         {
-                            fib = proc_map[&to];
-                            if (!fib) // 'to' is not registered either, create a new fiber for it
-                            {
-                                fib = new fiber;
-
+                            fib = sem_map[sem];
+                            if (!fib) {
+                                fib = sem_map[sem] = new fiber;
+                                // create a new schedule
+                                s_.add(sem, *fib);
                             }
-                            proc_map[&from] = fib; // register fiber
+                            // 'to' belongs to same fiber as 'from'
+
+                            proc_map[&to] = fib;
+
+                        } else // 'from' is not rate-triggering, get its fiber
+                        {
+                            fib = proc_map[&from];
+                            if (!fib) // no fiber, see if 'to''s fiber is registered
+                            {
+      
+                                    fib = proc_map[&to];
+
+                                if (!fib) // 'to' is not registered either, create a new fiber for it
+                                {
+                                    fib = new fiber;
+
+                                }
+                                proc_map[&from] = fib; // register fiber
+                            }
+
+
                         }
-
-
-                    }
-                    proc_map[&to] = fib;
 
                     fib->connect_procs(from, to);
+
                 }
             };
 

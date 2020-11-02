@@ -1,8 +1,12 @@
 #pragma once
 #include "../../eng/eng_traits.h"
 #include "../new_processor.h"
+#include "../../eng/quick_queue.h"
 #define _USE_MATH_DEFINES
+
 #include <math.h>
+#include <boost/math/special_functions/bessel.hpp>
+
 namespace sel {
 	namespace eng7 {
 		namespace proc {
@@ -96,21 +100,20 @@ namespace sel {
 			template<typename traits, typename wintype, size_t input_sz, bool = (traits::overlap > 0)> class window_t;
 
 			template<typename traits, typename wintype, size_t input_sz> class window_t<traits, wintype, input_sz, false> :
-				public  Processor1A1B<traits::input_frame_size, traits::input_frame_size>, virtual public creatable<window_t<traits, wintype, input_sz>>
+				public  stdproc<traits::input_frame_size, traits::input_frame_size>
 			{
 			public:
 				/*
 				|
 				*/
 
-				virtual const std::string type() const override { return wintype::name(); }
 
 				void process() final
 				{
-					wintype::process_buffer(this->in, this->out);
+					wintype::process_buffer(this->in_v().data(), this->out().data());
 				}
 
-				void init(schedule* context) final {
+				void init(eng::schedule* context) final {
 
 				}
 
@@ -119,20 +122,38 @@ namespace sel {
 
 
 			};
+
 			template<typename traits, typename wintype, size_t input_sz> class window_t<traits, wintype, input_sz, true> :
-				public data_source<traits::input_frame_size>, virtual public creatable<window_t<traits, wintype, input_sz>>
+		public processor,
+		public eng::semaphore
 			{
+                std::array<samp_t, input_sz>* input_port;
+                std::array<samp_t, input_sz>* output_port;
+
+
+                auto& in() { return input_port; }
+               const auto in_v() const { return *input_port; }
+                auto& out() { return output_port; }
+                auto out() const {return output_port; }
+
+                template<class TO_PROC, size_t from_pin = 0, size_t to_pin = 0> void connect_to(TO_PROC& to) {
+                    static_assert(TO_PROC::has_inputs, "Can't connect: 'to' Processor has no inputs.");
+                    static_assert(has_outputs, "Can't connect: 'from' Processor has no outputs.");
+
+                    to.template in<to_pin>() = &output_port;
+                }
+
 				static constexpr size_t output_sz = traits::input_frame_size;
 				static_assert(traits::overlap < output_sz, "Window overlap must be less than window size.");
 			public:
-				using fifo = quick_queue<samp_t, output_sz>;
+				using fifo = sel::quick_queue<samp_t, output_sz>;
 				fifo fifo_;
 				// At init time, this is set by the output processor
-				schedule* output_context = nullptr;
+				eng::schedule* output_context = nullptr;
 
-				struct in_proc_t : Processor1A0<input_sz>
+				struct in_proc_t : stdsink<input_sz>
 				{
-					using input_buf = quick_queue<samp_t, 2 * std::max(input_sz, output_sz)>;
+					using input_buf = sel::quick_queue<samp_t, 2 * ::std::max(input_sz, output_sz)>;
 					input_buf input_buf_;
 
 					wintype impl_;
@@ -151,7 +172,7 @@ namespace sel {
 
 					}
 
-					void init(schedule* context) final {
+					void init(eng::schedule* context) final {
 						if (context->trigger() == owner)
 							throw eng_ex("Window input can't triggered by the window itself.");
 
@@ -161,7 +182,7 @@ namespace sel {
 				} input_;
 
 
-				void init(schedule* context) final
+				void init(eng::schedule* context) final
 				{
 					if (context->trigger() != this)
 						throw eng_ex("Window output must be triggered by the window itself.");
@@ -172,20 +193,6 @@ namespace sel {
 				{
 					this->fifo_.atomicread_into(this->oport);
 				}
-
-
-
-				virtual const std::string type() const override { return wintype::name(); }
-
-
-				ConnectableProcessor& input_proc() final { return input_; }
-
-
-				template<class Impl>void ConnectFrom(connectable_t<Impl>& from)
-				{
-					input_.ConnectFrom(from);
-				}
-
 
 
 				explicit window_t() : input_(this) {}

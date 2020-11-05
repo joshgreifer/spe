@@ -7,3 +7,4 @@ add_subdirectory(demo)
 add_subdirectory(test)
 
 add_subdirectory(pix2pix)
+add_subdirectory(core8)

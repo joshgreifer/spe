@@ -112,9 +112,6 @@ void run() {
     graph.connect(kaiser_window1, nullsink1);
 
 
-
-
-
     s.run();
     std::array<samp_t, N>& my_kaiser_result(kaiser_window1.out());
 	SEL_UNIT_TEST_ITEM("kaiser window");

@@ -25,7 +25,7 @@ namespace sel {
 				}
 				
 
-				void process(void)
+				void process(void) final
 				{
 
 

@@ -138,8 +138,6 @@ namespace sel {
 
                 template<class TO_PROC, size_t from_pin = 0, size_t to_pin = 0> void connect_to(TO_PROC& to) {
                     static_assert(TO_PROC::has_inputs, "Can't connect: 'to' Processor has no inputs.");
-                    static_assert(has_outputs, "Can't connect: 'from' Processor has no outputs.");
-
                     to.template in<to_pin>() = &output_port;
                 }
 

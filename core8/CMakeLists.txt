@@ -39,14 +39,14 @@ endif()
 
 # add the executable
 
-add_executable(core8_test core8_test.cpp)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+	add_executable(core8_test core8_test.cpp)
 	set_property(TARGET core8_test PROPERTY CXX_STANDARD 20)
 	set_property(TARGET core8_test PROPERTY CXX_STANDARD_REQUIRED ON)
 #	set_property(TARGET core8_test PROPERTY CXX_EXTENSIONS ON)
+	target_link_libraries( core8_test PRIVATE cppcoro)
 endif()
 file(GLOB ARTEFACTS artefacts/*)
 file(COPY ${ARTEFACTS} DESTINATION .)
 
-target_link_libraries( core8_test PRIVATE cppcoro)
 

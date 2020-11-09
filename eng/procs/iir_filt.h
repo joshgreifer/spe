@@ -20,9 +20,9 @@ namespace sel {
 				void check_coeffs() const
 				{
 				if (b_.size() != a_.size())
-					throw eng_ex("IIR Filter: numerator (b) and denominator (a) coefficent vectors differ in size.");
+					throw eng_ex("IIR Filter: numerator (b) and denominator (a) coefficient vectors differ in size.");
 				if (a_[0] == 0.0)
-					throw eng_ex("IIR Filter: first denominator (a) coefficent cannot be zero.");
+					throw eng_ex("IIR Filter: first denominator (a) coefficient cannot be zero.");
 				}
 					
 				
@@ -82,9 +82,9 @@ namespace sel {
 				iir_filt({ 1, 0}, { 1.0, alpha }) {}
 				
 			};
-			// See Hal Chamberlin's &quot;Musical Applications of Microprocssors, Page 585 ff &quot; for a discussion and explanation.
+			// See Hal Chamberlin's &quot;Musical Applications of Microprocessors, Page 585 ff &quot; for a discussion and explanation.
 			// http://sites.music.columbia.edu/cmc/courses/g6610/fall2016/week8/Musical_Applications_of_Microprocessors-Charmberlin.pdf
-			//6 dB per octave low pass (RC) filter.  This is implemented as an IIR filter, where the A and B coefficents are dervied thus:
+			//6 dB per octave low pass (RC) filter.  This is implemented as an IIR filter, where the A and B coefficients are derived thus:
 
 			//K = 1-exp(2PI Fc/Fs)
 			//b = [ K/2 K/2 ]

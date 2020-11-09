@@ -31,7 +31,7 @@ namespace sel {
 						this->out[i] = ifft_as_complex_array[i].real() / (samp_t)SZ;
 
 				}
-				// default constuctor needed for factory creation
+				// default constructor needed for factory creation
 				explicit ac() {}
 
 				void freeze(void) final 

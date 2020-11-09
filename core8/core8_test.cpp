@@ -2,7 +2,7 @@
 // Created by josh on 03/11/2020.
 //
 #ifdef __GNUC__
-    int main() {}
+int main() {}
 #else
 #include <string>
 #include <iostream>
@@ -19,48 +19,48 @@
 namespace stdco=std::experimental;
 auto operator co_await(std::chrono::system_clock::duration duration)
 {
-class awaiter
-{
-    static
-    void CALLBACK TimerCallback(PTP_CALLBACK_INSTANCE,
-                                void* Context,
-                                PTP_TIMER)
+    class awaiter
     {
-        stdco::coroutine_handle<>::from_address(Context).resume();
-    }
-    PTP_TIMER timer = nullptr;
-    std::chrono::system_clock::duration duration;
-public:
+        static
+        void CALLBACK TimerCallback(PTP_CALLBACK_INSTANCE,
+                                    void* Context,
+                                    PTP_TIMER)
+        {
+            stdco::coroutine_handle<>::from_address(Context).resume();
+        }
+        PTP_TIMER timer = nullptr;
+        std::chrono::system_clock::duration duration;
+    public:
 
-    explicit awaiter(std::chrono::system_clock::duration d)
-            : duration(d)
-    {}
+        explicit awaiter(std::chrono::system_clock::duration d)
+                : duration(d)
+        {}
 
-    ~awaiter()
-    {
-        if (timer) CloseThreadpoolTimer(timer);
-    }
+        ~awaiter()
+        {
+            if (timer) CloseThreadpoolTimer(timer);
+        }
 
-    bool await_ready() const
-    {
-        return duration.count() <= 0;
-    }
+        bool await_ready() const
+        {
+            return duration.count() <= 0;
+        }
 
-    bool await_suspend(stdco::coroutine_handle<> resume_cb)
-    {
-        int64_t relative_count = -duration.count();
-        timer = CreateThreadpoolTimer(TimerCallback,
-                                      resume_cb.address(),
-                                      nullptr);
-        bool success = timer != nullptr;
-        SetThreadpoolTimer(timer, (PFILETIME)&relative_count, 0, 0);
-        return success;
-    }
+        bool await_suspend(stdco::coroutine_handle<> resume_cb)
+        {
+            int64_t relative_count = -duration.count();
+            timer = CreateThreadpoolTimer(TimerCallback,
+                                          resume_cb.address(),
+                                          nullptr);
+            bool success = timer != nullptr;
+            SetThreadpoolTimer(timer, (PFILETIME)&relative_count, 0, 0);
+            return success;
+        }
 
-    void await_resume() {}
+        void await_resume() {}
 
-};
-return awaiter{ duration };
+    };
+    return awaiter{ duration };
 }
 #endif
 void print_time()

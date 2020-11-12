@@ -1,8 +1,8 @@
 #pragma once
 #include <tuple>
-#include "../eng/scheduler.h"
-#include "../eng/event.h"
-#include "../eng/func.h"
+#include "../eng6/scheduler.h"
+#include "../eng6/event.h"
+#include "../eng6/func.h"
 
 #include <eigen3/Eigen/Core>
 namespace magic {
@@ -27,8 +27,8 @@ namespace sel {
 
 			void operator()() final { process(); }
 			virtual void process() = 0;
-			virtual void init(eng::schedule* context) {};
-			virtual void term(eng::schedule* context) {};
+			virtual void init(eng6::schedule* context) {};
+			virtual void term(eng6::schedule* context) {};
 
 			virtual ~processor() {}
 		};
@@ -136,12 +136,12 @@ namespace sel {
 
 		};
 
-		template<size_t OUTW, class output_t>class data_source : public stdsource<OUTW, output_t>, public eng::semaphore {
+		template<size_t OUTW, class output_t>class data_source : public stdsource<OUTW, output_t>, public eng6::semaphore {
 		public:
 			//				virtual const std::string type() const override { return "data_source"; }
-			data_source(rate_t expected_rate = rate_t()) : eng::semaphore(0, expected_rate) {}
-			void enable(bool enabled = true) const { eng::semaphore::enabled = enabled; }
-			void invoke(size_t repeat_count = 1) { eng::schedule(this, *this).invoke(repeat_count); }
+			data_source(rate_t expected_rate = rate_t()) : eng6::semaphore(0, expected_rate) {}
+			void enable(bool enabled = true) const { eng6::semaphore::enabled = enabled; }
+			void invoke(size_t repeat_count = 1) { eng6::schedule(this, *this).invoke(repeat_count); }
 		};
 	}
 }

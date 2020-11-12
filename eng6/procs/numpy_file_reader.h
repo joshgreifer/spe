@@ -1,16 +1,13 @@
 #pragma once
-#include "../new_processor.h"
+#include "../processor.h"
+#include "data_source.h"
+#include "../numpy.h"
 
-#include "../../eng6/numpy.h"
+namespace sel {
+    namespace eng6 {
+        namespace proc {
 
-namespace sel
-{
-    namespace eng7
-    {
-        namespace proc
-        {
-
-            template<class data_t, size_t ArrayWidth>class numpy_file_reader : public  data_source<ArrayWidth, samp_t>
+            template<class data_t, size_t ArrayWidth>class numpy_file_reader : public data_source<ArrayWidth>
             {
                 std::vector<data_t> v;
 
@@ -26,7 +23,7 @@ namespace sel
                         throw std::error_code(eng_errc::input_stream_eof);
                     }
                     for (size_t i = 0 ; i < ArrayWidth; ++i)
-                        this->out()[i] = static_cast<samp_t>(v[offset++]);
+                        this->out[i] = static_cast<samp_t>(v[offset++]);
 
                 }
 

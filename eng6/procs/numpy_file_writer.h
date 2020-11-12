@@ -1,17 +1,16 @@
 #pragma once
-#include "../new_processor.h"
-#include "../../eng6/numpy.h"
+#include "../processor.h"
+#include "../numpy.h"
 /*
  * Saves output as numpy file 2d array,  shape [ArrayWidth,  n]
  */
 namespace sel
 {
-	namespace eng7
-	{
+	namespace eng6 {
 		namespace proc
 		{
 
-			template<class data_t, size_t ArrayWidth, size_t max_rows = 1000000>class numpy_file_writer : public stdsink<ArrayWidth>
+			template<class data_t, size_t ArrayWidth, size_t max_rows = 1000000>class numpy_file_writer : public sel::eng6::Processor1A0<ArrayWidth>
 			{
 				std::vector<data_t> v;
 
@@ -24,7 +23,7 @@ namespace sel
 
                     if (++rows_acquired <= max_rows)
                         for (size_t i = 0; i < ArrayWidth; ++i)
-						    v.push_back(static_cast<data_t>(this->in_v()[i]));
+						    v.push_back(static_cast<data_t>(this->in[i]));
 
 				}
 
@@ -33,9 +32,9 @@ namespace sel
 
 				}
 
-				void term(sel::eng6::schedule* context) final
+				void term(schedule* context) final
 				{
-					sel::numpy::save(v.data(), file_name.c_str(), { ArrayWidth, static_cast<int>(v.size() / ArrayWidth) });
+					numpy::save(v.data(), file_name.c_str(), { ArrayWidth, static_cast<int>(v.size() / ArrayWidth) });
 				}
 			};
 		}

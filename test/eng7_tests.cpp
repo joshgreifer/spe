@@ -12,7 +12,7 @@
 #define COMPILE_UNIT_TESTS
 
 
-#include  "../eng/unit_test.h"
+#include  "../eng6/unit_test.h"
 #include "../eng7/new_processor.h"
 #include "../eng7/procs/rand.h"
 #include "../eng7/procs/fir_filt.h"

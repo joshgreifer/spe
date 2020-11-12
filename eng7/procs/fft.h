@@ -141,7 +141,7 @@ namespace sel {
 
 
 #if defined(COMPILE_UNIT_TESTS)
-#include "../../eng/unit_test.h"
+#include "../../eng6/unit_test.h"
 
 SEL_UNIT_TEST(fft);
 

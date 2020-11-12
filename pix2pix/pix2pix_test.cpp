@@ -6,7 +6,7 @@
 #include <opencv2/core.hpp>
 
 #include <opencv2/dnn/dnn.hpp>
-#include "../eng/melspec_impl.h"
+#include "../eng6/melspec_impl.h"
 
 #define USE_OPENCV_DNN
 

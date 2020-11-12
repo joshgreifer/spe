@@ -7,8 +7,8 @@
 #pragma once
 #include <iostream>
 #include "new_processor.h"
-#include "../eng/scheduler.h"
-#include "../eng/dag.h"
+#include "../eng6/scheduler.h"
+#include "../eng6/dag.h"
 
 namespace sel
 {
@@ -32,13 +32,13 @@ namespace sel
                     }
                 }
 
-                void init(eng::schedule *context) final {
+                void init(eng6::schedule *context) final {
                     for (auto proc : *this) {
                         proc->init(context);
                     }
                 }
 
-                void term(eng::schedule *context) final {
+                void term(eng6::schedule *context) final {
                     for (auto proc : *this) {
                         proc->term(context);
                     }
@@ -116,13 +116,13 @@ namespace sel
             {
 
                 using fiber=processor_dag;
-                std::map<eng::semaphore*, fiber*> sem_map;
+                std::map<eng6::semaphore*, fiber*> sem_map;
 
                 std::map<processor*, fiber*> proc_map;
-                eng::scheduler& s_;
+                eng6::scheduler& s_;
             public:
 
-                processor_graph(eng::scheduler& s = eng::scheduler::get()) : s_(s) {}
+                processor_graph(eng6::scheduler& s = eng6::scheduler::get()) : s_(s) {}
 
                 template<class FROM_PROC, class TO_PROC, size_t from_pin = 0, size_t to_pin = 0>
                 void connect(FROM_PROC& from, TO_PROC& to)
@@ -132,7 +132,7 @@ namespace sel
                     //		if not found, look for 'to' proc,  and do fiber_containing_to.connect_procs()
                     //			if *still* not found, create a new fiber,  and do new_fiber.connect_procs()
 
-                        auto sem = dynamic_cast<eng::semaphore *>(&from);
+                        auto sem = dynamic_cast<eng6::semaphore *>(&from);
                         fiber *fib = nullptr;
                         if (sem)  // 'from' is rate-triggering
                         {

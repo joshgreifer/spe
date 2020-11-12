@@ -1,17 +1,17 @@
 #pragma once
-#include "../new_processor.h"
-#include "../../eng6/idx.h"
-#include "../../eng6/params.h"
+#include "../processor.h"
+#include "../idx.h"
 #include <vector>
 
 
 
 namespace sel {
-	namespace eng7 {
+	namespace eng6 {
 		namespace proc {
- 
-			template<size_t Sz = dynamic_size_v>
-			class fir_filt : public stdproc<1, 1>
+
+
+			template<size_t Sz=dynamic_size_v> 
+			class fir_filt : public  Processor1A1B<1, 1>, virtual public creatable<fir_filt<Sz>>
 			{
 				const size_t sz;
 				std::vector<samp_t> coeffs_;
@@ -43,13 +43,13 @@ namespace sel {
 			
 				void process() final 
 				{
-					*buf_ptr_++  = this->in_v()[0];
+					*buf_ptr_++  = this->in[0];
 					double output = 0.0;
 					for (auto coeff : coeffs_) {
 						output += coeff * *buf_ptr_++;
 					}
 
-					this->out()[0] = output;
+					this->out[0] = output;
 
 				}	
 			};
@@ -57,11 +57,11 @@ namespace sel {
 		} // proc
 	} // eng
 } // sel
-#if (defined(COMPILE_UNIT_TESTS) || defined(UNIT_TEST_FIR_FILT7))
+#if (defined(COMPILE_UNIT_TESTS) || defined(UNIT_TEST_FIR_FILT))
 #include "rand.h"
-#include "../../eng6/unit_test.h"
+#include "../unit_test.h"
 
-SEL_UNIT_TEST(fir_filt7)
+SEL_UNIT_TEST(fir_filt)
 struct ut_traits
 {
 	static constexpr size_t signal_length = 10;
@@ -81,17 +81,17 @@ std::array<samp_t, ut_traits::signal_length> matlab_results = { {
 
 void run()
 {
-
-	sel::eng7::proc::fir_filt<4> filt({-0.0696887105265845,	0.366902203216131,	0.366902203216131,	-0.0696887105265845 });
-	sel::eng7::proc::rand<1> rng;
-	rng.connect_to(filt);
-
+	sel::eng6::proc::rand<1> rng;
+	sel::eng6::proc::fir_filt<4> filt({-0.0696887105265845,	0.366902203216131,	0.366902203216131,	-0.0696887105265845 });
+	rng.ConnectTo(filt);
+	rng.freeze();
+	filt.freeze();
 
 	for (size_t iter = 0; iter < ut_traits::signal_length; ++iter)
 	{
 		rng.process();
 		filt.process();
-		SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(filt.out()[0], matlab_results[iter])
+		SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(filt.out[0], matlab_results[iter])
 
 	}
 

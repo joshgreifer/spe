@@ -6,18 +6,18 @@
 #define SPE_NUMPY_UT_H
 #if defined(COMPILE_UNIT_TESTS)
 #pragma once
-#include "../../eng6/unit_test.h"
-#include "../../eng6/numpy.h"
-#include "../../eng6/scheduler.h"
-#include "../graph.h"
+#include "../unit_test.h"
+#include "../numpy.h"
+#include "../scheduler.h"
+#include "compound_processor.h"
 #include "numpy_file_reader.h"
 #include "numpy_file_writer.h"
 
-SEL_UNIT_TEST(numpy7)
+SEL_UNIT_TEST(numpy)
 
         const std::string test_file = "test.npy";
-        using npy_writer = sel::eng7::proc::numpy_file_writer<float, 20>;
-        using npy_reader = sel::eng7::proc::numpy_file_reader<float, 20>;
+        using npy_writer = sel::eng6::proc::numpy_file_writer<float, 20>;
+        using npy_reader = sel::eng6::proc::numpy_file_reader<float, 20>;
         void run() {
 
         std::vector<int>shape = { 20, 30 };
@@ -37,7 +37,7 @@ SEL_UNIT_TEST(numpy7)
         SEL_UNIT_TEST_ITEM("reader and writer processors");
         auto &s = sel::eng6::scheduler::get();
         s.clear();
-        sel::eng7::proc::processor_graph graph;
+        sel::eng6::proc::processor_graph graph;
 
         auto reader1 = npy_reader(test_file);
         auto writer1 = npy_writer(test_file);

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "../../eng/unit_test.h"
+#include "../../eng6/unit_test.h"
 #include <iostream>
 
 // window unit test
 #include "window.h"
 //#include "wav_file_data_source.h"
 
-#include "../../eng/scheduler.h"
+#include "../../eng6/scheduler.h"
 
 #include "../graph.h"
 
@@ -37,7 +37,7 @@ struct ut_traits
 	static constexpr size_t overlap = input_frame_size - hop_size;
 
 };
-struct sig_gen_ramp : sel::eng::Processor01A<ut_traits_overlap::input_frame_size>
+struct sig_gen_ramp : sel::eng6::Processor01A<ut_traits_overlap::input_frame_size>
 {
 	size_t c = 0;
 	void process() final
@@ -52,7 +52,7 @@ using hamming_window = sel::eng7::proc::window_t<ut_traits_no_overlap, sel::eng7
 using rectangular_window = sel::eng7::proc::window_t<ut_traits_overlap, sel::eng7::proc::wintype::RECTANGULAR<ut_traits_overlap>, ut_traits_overlap::input_frame_size>;
 using hann_window = sel::eng7::proc::window_t<ut_traits, sel::eng7::proc::wintype::HANN<ut_traits>, ut_traits::input_frame_size>;
 
-//using wav_reader = sel::eng::proc::wav_file_data_source<ut_traits::input_frame_size>;
+//using wav_reader = sel::eng6::proc::wav_file_data_source<ut_traits::input_frame_size>;
 
 
 
@@ -102,7 +102,7 @@ void run() {
 
 
 
-    auto &s = sel::eng::scheduler::get();
+    auto &s = sel::eng6::scheduler::get();
     sel::eng7::proc::processor_graph graph(s);
 
 	kaiser_window kaiser_window1;

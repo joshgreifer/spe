@@ -13,7 +13,7 @@
 #include "websocket_stream.h"
 #include "procs/data_source.h"
 #include "procs/compound_processor.h"
-#include "procs/wav_file_data_source.h"
+//#include "procs/wav_file_data_source.h"
 #include "procs/wav_file_reader.h"
 #include "procs/matlab_file_output.h"
 #include "procs/numpy_file_writer.h"

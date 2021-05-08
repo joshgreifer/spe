@@ -74,7 +74,7 @@ namespace sel {
 			}
 		private:
 
-            void accept(func on_connected) {
+            void do_accept(func on_connected) {
                 acceptor_.async_accept(get_lowest_layer(ws_).socket(), [this, on_connected](boost::system::error_code ec) {
                     if (ec)
                         throw eng_ex(ec.message());
@@ -143,7 +143,7 @@ namespace sel {
 				if (ec)
 					throw eng_ex(ec.message());
 
-				accept(on_connected);
+                do_accept(on_connected);
 
 
 #if NOT_A_SERVER

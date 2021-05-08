@@ -101,7 +101,6 @@ namespace sel {
                 wav_file_header header;
 
                 header.szRIFF = sizeof(header) + n_samples * bytes_per_sample * n_channels;
-                header.RiffFormat = "foo";
                 if constexpr (std::is_floating_point_v<sample_t>)
                     header.AudioFormat = WAVE_FORMAT_IEEE_FLOAT;
                 else
@@ -126,7 +125,7 @@ namespace sel {
 
                 wav_file_header header;
                 if (!read(fd, &header, sizeof(wav_file_header)))
-                    throw sys_ex();
+                    throw std::runtime_error(strerror(errno));
                 close(fd);
                 header.validate();
                 return header;
@@ -213,18 +212,24 @@ namespace sel {
         template<class data_type,size_t n_channels, size_t sample_rate, std::enable_if_t<std::is_arithmetic<data_type>::value, int> = 0>
           void save(std::vector<data_type> data, const char *file_name)
           {
-              auto n_values = data.size();
-              auto header = wav_file_header::create<data_type, sample_rate, n_channels>();
-
-              FILE* out = fopen(file_name, "wb");
-              fwrite(header, 1, sizeof(header), out);
-              auto el_size = sizeof(data[0]);
-
-              auto n_written = fwrite(&data[0], el_size, n_values, out);
-              if (n_written != n_values)
-                  perror(nullptr);
-              fclose(out);
+              save<data_type, n_channels, sample_rate>(data.data(), data.size());
           }
+
+        template<class data_type,size_t n_channels, size_t sample_rate, std::enable_if_t<std::is_arithmetic<data_type>::value, int> = 0>
+        void save(const data_type *data, const size_t n_values, const char *file_name)
+        {
+            auto header = wav_file_header::create<data_type, sample_rate, n_channels>();
+
+            FILE* out = fopen(file_name, "wb");
+            fwrite(header, 1, sizeof(header), out);
+            auto el_size = sizeof(data[0]);
+
+            auto n_written = fwrite(&data[0], el_size, n_values, out);
+            if (n_written != n_values)
+                perror(nullptr);
+            fclose(out);
+        }
+
 #pragma pack(pop)
 
 

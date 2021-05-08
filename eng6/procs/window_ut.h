@@ -3,7 +3,7 @@
 
 // window unit test
 #include "window.h"
-#include "wav_file_data_source.h"
+//#include "wav_file_data_source.h"
 #include "compound_processor.h"
 #include "../scheduler.h"
 #include "../unit_test.h"
@@ -49,7 +49,7 @@ using hamming_window = sel::eng6::proc::window_t<ut_traits_no_overlap, sel::eng6
 using rectangular_window = sel::eng6::proc::window_t<ut_traits_overlap, sel::eng6::proc::wintype::RECTANGULAR<ut_traits_overlap>, ut_traits_overlap::input_frame_size>;
 using hann_window = sel::eng6::proc::window_t<ut_traits, sel::eng6::proc::wintype::HANN<ut_traits>, ut_traits::input_frame_size>;
 
-using wav_reader = sel::eng6::proc::wav_file_data_source<ut_traits::input_frame_size>;
+//using wav_reader = sel::eng6::proc::wav_file_data_source<ut_traits::input_frame_size>;
 
 sel::eng6::Const input = std::vector<double>(ut_traits_no_overlap::input_frame_size, 1.0);
 static constexpr size_t N = ut_traits_no_overlap::input_frame_size;

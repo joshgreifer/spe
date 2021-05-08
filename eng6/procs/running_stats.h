@@ -22,11 +22,14 @@ namespace sel {
 				static constexpr size_t recalc_sum_iters = 100000;
 				static constexpr samp_t mean_x() { return  (Sz-1) / 2.0; }
 
-				static constexpr samp_t b2(const size_t i = Sz)
+				static constexpr samp_t b2()
 				{
-					if (i == 0)
-						return 0.0;
-					return (i-mean_x()) * (i-mean_x()) + b2(i-1);
+				    auto accum = 0.0;
+				    for (size_t i = 0; i < Sz; ++i) {
+				        const auto dist = i - mean_x();
+                        accum += dist * dist;
+                    }
+				    return accum;
 				}
 
 				double sample_interval = 0.0;

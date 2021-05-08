@@ -164,9 +164,9 @@ struct eng_ex : public std::runtime_error {
 	eng_ex(int os_errno) : runtime_error(strerror(os_errno)) {}
 
 };
-struct sys_ex : public eng_ex
+struct sys_ex : public std::runtime_error
 {
-	sys_ex(int os_errno = errno) : eng_ex(os_errno) {}
+	sys_ex(int os_errno = errno) : std::runtime_error(strerror(os_errno)) {}
 };
 
 

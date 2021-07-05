@@ -46,6 +46,19 @@ public:
 	}	
 };
 
+struct pow : public sel::eng6::Processor1A1B< ut_traits::input_frame_size,  ut_traits::input_frame_size>
+{
+    const double exponent;
+    pow(double exponent) : exponent(exponent ){
+
+    }
+public:
+    void process() final
+    {
+        for (size_t i = 0; i < ut_traits::input_frame_size; ++i)
+        this->out[i] = ::pow(this->in[i], exponent);
+    }
+};
 
 
 void run() {
@@ -72,6 +85,7 @@ void run() {
 	hann_window window1;
 	fft fft1;
 	mag mag1;
+    pow square1(2.0);
 
 	sel::eng6::scheduler& s = sel::eng6::scheduler::get();
 	s.clear();
@@ -79,8 +93,9 @@ void run() {
 	sel::eng6::proc::processor_graph graph(s);
 	graph.connect(rng1, window1);
 	graph.connect(window1, fft1);
-	graph.connect(fft1, mag1);
-	graph.connect(mag1, melspec1);
+    graph.connect(fft1, mag1);
+    graph.connect(mag1, square1);
+	graph.connect(square1, melspec1);
 
 	rng1.raise();  // run one schedule
 	s.init();
@@ -117,13 +132,12 @@ void run() {
 		"n_fft"_a = ut_traits::input_frame_size,
 		"htk"_a = ut_traits::htk,
 		"hop_length"_a = ut_traits::input_frame_size,
-		"power"_a = 1,
+		"power"_a = 2,
 		"window"_a = "hann"
 	);
 	auto melspec_py_vec = python::make_vector_from_1d_numpy_array(melspec_py);
 	for (size_t i = 0; i < ut_traits::n_mels; ++i)
-		SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(melspec_py_vec[i], melspec1.out[i])
-		;
+        SEL_UNIT_TEST_EQUAL_THRESH(melspec_py_vec[i], melspec1.out[i], 1e-5);
 }
 
 SEL_UNIT_TEST_END

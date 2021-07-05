@@ -21,10 +21,12 @@ public:
 
 	py::module np;
 	py::module librosa;
+	py::module scipy_fftpack; // for DCT unit test
 	python()
 	{
 		np = py::module::import("numpy");
 		librosa = py::module::import("librosa");
+        scipy_fftpack = py::module::import("scipy.fftpack");
 	}
 };
 #endif

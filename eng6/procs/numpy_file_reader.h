@@ -36,7 +36,7 @@ namespace sel {
                         throw eng_ex("Numpy file does not contain a whole number of rows. Shape is incorrect");
 
                     // raise semaphore count (+1 so that  EOF will get signalled)
-                    raise(rows_in_file+1);
+                    this->raise(rows_in_file+1);
                 }
 
             };

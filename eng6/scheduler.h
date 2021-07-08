@@ -70,7 +70,7 @@ namespace sel {
 					}
 					else {
 						//reset();
-						raise();
+						this->raise();
 						//std::cerr << "\n< Reschedule callback: Semaphore count " << this->count() << "\tasio_timer expiry " << std::chrono::time_point_cast<std::chrono::seconds>(timer_.expiry()).time_since_epoch().count();
 						timer_.expires_at(timer_.expiry() + period_ns_);
 						reschedule();

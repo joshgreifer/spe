@@ -51,7 +51,7 @@ namespace sel
 
 
                     // raise semaphore count (+1 so that  EOF will get signalled)
-                    raise(rows_in_file+1);
+                    this->raise(rows_in_file+1);
                 }
 
             };

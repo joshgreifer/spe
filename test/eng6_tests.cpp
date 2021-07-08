@@ -20,9 +20,9 @@ int main()
 {
 
     SEL_UNIT_TEST_SUITE_BEGIN
-	SEL_RUN_UNIT_TEST(dct)
-	SEL_RUN_UNIT_TEST(fft)
-    SEL_RUN_UNIT_TEST(melspec)
+//	SEL_RUN_UNIT_TEST(dct)
+//	SEL_RUN_UNIT_TEST(fft)
+//    SEL_RUN_UNIT_TEST(melspec)
 //	SEL_RUN_UNIT_TEST(lattice_filter)
 //	SEL_RUN_UNIT_TEST(periodic_event)
 //	SEL_RUN_UNIT_TEST(resampler)
@@ -37,8 +37,8 @@ int main()
 //	SEL_RUN_UNIT_TEST(lpc)
 
 //
-//    SEL_RUN_UNIT_TEST(numpy)
-//    SEL_RUN_UNIT_TEST(wavfile)
+    SEL_RUN_UNIT_TEST(numpy)
+    SEL_RUN_UNIT_TEST(wavfile)
     SEL_RUN_UNIT_TEST(wav_file_reader)
 //	SEL_RUN_UNIT_TEST(mux_demux)
 //	SEL_RUN_UNIT_TEST(psd)

@@ -4,11 +4,15 @@
 namespace sel {
     namespace eng6 {
         namespace proc {
-            // Discrete Cosine Transform, types I, II, III, and IV
+            // Naive implementation of Discrete Cosine Transform, types I, II, III, and IV
 
-            // https://en.wikipedia.org/wiki/Discrete_cosine_transform#DCT-II
-            // This code follows SciPy's dct methods
+            // https://en.wikipedia.org/wiki/Discrete_cosine_transform
+
+            // This code uses SciPy's dct definitions, and results match
             // https://docs.scipy.org/doc/scipy/reference/generated/scipy.fftpack.dct.html
+
+            // For fast DCT (not implemented here) see:
+            // https://www.nayuki.io/page/fast-discrete-cosine-transform-algorithms
             /// TODO: ortho-normalization
 
 
@@ -29,16 +33,17 @@ namespace sel {
                         f = std::make_shared<factors_t>();
 
                         auto &factors = *f;
+                        auto fp = factors.data();
                         for (size_t k = 0; k < N; ++k)
                             for (size_t n = 0; n < N; ++n)
                                 if constexpr (DctType == 1U)
-                                    factors(k, n) = cos(M_PI / (N - 1) * n * k);
+                                   *fp++ = cos(M_PI / (N - 1) * n * k);
                                 else if constexpr (DctType == 2U)
-                                    factors(k, n) = cos(M_PI / N * (n + 0.5) * k);
+                                    *fp++ = cos(M_PI / N * (n + 0.5) * k);
                                 else if constexpr (DctType == 3U)
-                                    factors(k, n) = cos(M_PI / N * n * (k + 0.5));
+                                    *fp++ = cos(M_PI / N * n * (k + 0.5));
                                 else if constexpr (DctType == 4U)
-                                    factors(k, n) = cos(M_PI / N * (n + 0.5) * (k + 0.5));
+                                    *fp++ = cos(M_PI / N * (n + 0.5) * (k + 0.5));
                     }
                     return f;
 

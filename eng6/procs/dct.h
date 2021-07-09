@@ -105,7 +105,7 @@ namespace sel {
 
 SEL_UNIT_TEST(dct)
 
-        class ut_traits : public eng_traits<1024, 16000> {};
+        class ut_traits : public eng_traits<100, 16000> {};
 
 
         template<size_t DctType>using dct = sel::eng6::proc::dct<ut_traits, DctType>;

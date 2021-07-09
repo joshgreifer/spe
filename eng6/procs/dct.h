@@ -19,22 +19,28 @@ namespace sel {
 
                 static constexpr size_t N = SZ;
                 using factors_t = sel::array2d<double, SZ, SZ>;
-                mutable factors_t *factors_;
-                factors_t& factors;
+                using factors_p = std::shared_ptr<factors_t>;
+                factors_p factors_;
 
-                void make_factors()
+                static factors_p make_factors()
                 {
+                    static factors_p f;
+                    if (f.get() == nullptr) {
+                        f = std::make_shared<factors_t>();
 
-                    for (size_t k = 0; k < N; ++k)
-                        for (size_t n = 0; n < N; ++n)
-                            if constexpr (DctType==1U)
-                                factors(k, n) =  cos(M_PI / (N-1) * n * k);
-                            else if constexpr (DctType==2U)
-                                factors(k, n) =  cos(M_PI / N * (n + 0.5) * k);
-                            else if constexpr (DctType==3U)
-                                factors(k, n) =  cos(M_PI / N * n * (k + 0.5));
-                            else if constexpr (DctType==4U)
-                                factors(k, n) = cos(M_PI / N * (n + 0.5) * (k + 0.5));
+                        auto &factors = *f;
+                        for (size_t k = 0; k < N; ++k)
+                            for (size_t n = 0; n < N; ++n)
+                                if constexpr (DctType == 1U)
+                                    factors(k, n) = cos(M_PI / (N - 1) * n * k);
+                                else if constexpr (DctType == 2U)
+                                    factors(k, n) = cos(M_PI / N * (n + 0.5) * k);
+                                else if constexpr (DctType == 3U)
+                                    factors(k, n) = cos(M_PI / N * n * (k + 0.5));
+                                else if constexpr (DctType == 4U)
+                                    factors(k, n) = cos(M_PI / N * (n + 0.5) * (k + 0.5));
+                    }
+                    return f;
 
                 }
             public:
@@ -42,6 +48,7 @@ namespace sel {
 
                 void process() final
                 {
+                    const auto& factors = *factors_;
                     const auto first_x = this->in[0];
                     const auto last_x = this->in[N-1];
                     int flip = 1;
@@ -73,8 +80,8 @@ namespace sel {
 
                 }
                 // default constructor needed for factory creation
-                explicit dct() :  factors_(new factors_t), factors(*factors_) {
-                    make_factors();
+                explicit dct() :  factors_(make_factors()) {
+
                 }
 
                 dct(params& args) : dct()
@@ -83,7 +90,7 @@ namespace sel {
 
                 ~dct()
                 {
-                    delete factors_;
+//                    delete factors_;
                 }
 
             };
@@ -101,11 +108,8 @@ SEL_UNIT_TEST(dct)
         class ut_traits : public eng_traits<1024, 16000> {};
 
 
+        template<size_t DctType>using dct = sel::eng6::proc::dct<ut_traits, DctType>;
 
-        using dct1 = sel::eng6::proc::dct<ut_traits, 1>;
-        using dct2 = sel::eng6::proc::dct<ut_traits, 2>;
-        using dct3 = sel::eng6::proc::dct<ut_traits, 3>;
-        using dct4 = sel::eng6::proc::dct<ut_traits, 4>;
         using rng = sel::eng6::proc::rand<ut_traits::input_frame_size>;
 
         void run() {
@@ -113,17 +117,14 @@ SEL_UNIT_TEST(dct)
             auto py_dct = python::get().scipy_fftpack.attr("dct");
 
             rng rng1;
-            dct1 my_dct1;
-            dct2 my_dct2;
-            dct3 my_dct3;
-            dct4 my_dct4;
 
             std::vector<sel::eng6::Processor1A1B<ut_traits::input_frame_size, ut_traits::input_frame_size>* > dcts = {
-                    &my_dct1, &my_dct2, &my_dct3, &my_dct4
+                    new dct<1>, new dct<2>, new dct<3>, new dct<4>
             };
 
             size_t dct_type = 0;
             rng1.process();
+
             const char *dct_type_names[] = { "n/a", "Type I", "Type II", "Type III", "Type IV" };
             for (auto pdct: dcts ) {
                 ++dct_type; // iterates through 1,2,3,4
@@ -132,11 +133,11 @@ SEL_UNIT_TEST(dct)
                 pdct->freeze();
                 pdct->process();
 
-                auto my_dct_result = pdct->Out(0)->as_vector();
+                auto my_dct_result_vec = pdct->Out(0)->as_vector();
                 py::array_t<double> py_dct_result = py_dct(rng1.Out(0)->as_vector(), "type"_a = dct_type);
                 auto py_dct_result_vec = python::make_vector_from_1d_numpy_array(py_dct_result);
-                for (size_t i = 0; i < dct4::N; ++i)
-                SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(my_dct_result[i],py_dct_result_vec[i]);
+                for (size_t i = 0; i < ut_traits::input_frame_size; ++i)
+                    SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(my_dct_result_vec[i],py_dct_result_vec[i]);
             }
 
         }

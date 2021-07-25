@@ -22,7 +22,7 @@ namespace sel {
 					const auto in_as_complex_array = reinterpret_cast<const csamp_t*>(this->in);
 					for (size_t i = 0; i < OUTW; ++i) {
 						samp_t v = abs(in_as_complex_array[i]);
-						this->out[i] =  abs(this->in_v()[i]);
+						this->out()[i] =  abs(this->in_v()[i]);
 
 					}
 				}

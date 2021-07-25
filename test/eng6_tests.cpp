@@ -20,7 +20,7 @@ int main()
 {
 
     SEL_UNIT_TEST_SUITE_BEGIN
-	SEL_RUN_UNIT_TEST(dct)
+//	SEL_RUN_UNIT_TEST(dct)
 //	SEL_RUN_UNIT_TEST(fft)
 //    SEL_RUN_UNIT_TEST(melspec)
 //	SEL_RUN_UNIT_TEST(lattice_filter)
@@ -31,7 +31,7 @@ int main()
 //	SEL_RUN_UNIT_TEST(rand)
 //	SEL_RUN_UNIT_TEST(fir_filt)
 //	SEL_RUN_UNIT_TEST(iir_filt)
-//	SEL_RUN_UNIT_TEST(dnn)
+	SEL_RUN_UNIT_TEST(dnn)
 //	SEL_RUN_UNIT_TEST(ewma)
 //	SEL_RUN_UNIT_TEST(expr)
 //	SEL_RUN_UNIT_TEST(lpc)

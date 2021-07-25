@@ -1,0 +1,4142 @@
+node {
+  name: "generator/prep_input_tensor"
+  op: "Placeholder"
+  attr {
+    key: "dtype"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "shape"
+    value {
+      shape {
+        dim {
+          size: -1
+        }
+        dim {
+          size: -1
+        }
+        dim {
+          size: 256
+        }
+      }
+    }
+  }
+}
+node {
+  name: "generator/prep_states_in_raw"
+  op: "Placeholder"
+  attr {
+    key: "dtype"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "shape"
+    value {
+      shape {
+        dim {
+          size: 1
+        }
+        dim {
+          size: 3
+        }
+        dim {
+          size: 2
+        }
+        dim {
+          size: -1
+        }
+        dim {
+          size: 256
+        }
+      }
+    }
+  }
+}
+node {
+  name: "generator/prep_keep_prob_tensor"
+  op: "Placeholder"
+  attr {
+    key: "dtype"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "shape"
+    value {
+      shape {
+        dim {
+          size: 1
+        }
+      }
+    }
+  }
+}
+node {
+  name: "generator/strided_slice"
+  op: "StridedSlice"
+  input: "generator/prep_keep_prob_tensor"
+  input: "generator/strided_slice/stack"
+  input: "generator/strided_slice/stack_1"
+  input: "generator/strided_slice/stack_2"
+  attr {
+    key: "begin_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "ellipsis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "end_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "new_axis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "shrink_axis_mask"
+    value {
+      i: 1
+    }
+  }
+}
+node {
+  name: "generator/mul"
+  op: "Mul"
+  input: "generator/mul/x"
+  input: "generator/prep_input_tensor"
+}
+node {
+  name: "generator/add"
+  op: "Add"
+  input: "generator/mul"
+  input: "generator/add/y"
+}
+node {
+  name: "generator/pre_fc/weights_pre_fc/read"
+  op: "Identity"
+  input: "generator/pre_fc/weights_pre_fc"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/pre_fc/weights_pre_fc"
+      }
+    }
+  }
+}
+node {
+  name: "generator/pre_fc/biases_pre_fc/read"
+  op: "Identity"
+  input: "generator/pre_fc/biases_pre_fc"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/pre_fc/biases_pre_fc"
+      }
+    }
+  }
+}
+node {
+  name: "generator/pre_fc/Reshape"
+  op: "Reshape"
+  input: "generator/add"
+  input: "generator/pre_fc/Reshape/shape"
+}
+node {
+  name: "generator/pre_fc/MatMul"
+  op: "MatMul"
+  input: "generator/pre_fc/Reshape"
+  input: "generator/pre_fc/weights_pre_fc/read"
+  attr {
+    key: "transpose_a"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "transpose_b"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "generator/pre_fc/Add"
+  op: "Add"
+  input: "generator/pre_fc/MatMul"
+  input: "generator/pre_fc/biases_pre_fc/read"
+}
+node {
+  name: "generator/pre_fc/Shape"
+  op: "Shape"
+  input: "generator/prep_input_tensor"
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "generator/pre_fc/strided_slice"
+  op: "StridedSlice"
+  input: "generator/pre_fc/Shape"
+  input: "generator/pre_fc/strided_slice/stack"
+  input: "generator/pre_fc/strided_slice/stack_1"
+  input: "generator/pre_fc/strided_slice/stack_2"
+  attr {
+    key: "begin_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "ellipsis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "end_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "new_axis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "shrink_axis_mask"
+    value {
+      i: 1
+    }
+  }
+}
+node {
+  name: "generator/pre_fc/Shape_1"
+  op: "Shape"
+  input: "generator/prep_input_tensor"
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "generator/pre_fc/strided_slice_1"
+  op: "StridedSlice"
+  input: "generator/pre_fc/Shape_1"
+  input: "generator/pre_fc/strided_slice_1/stack"
+  input: "generator/pre_fc/strided_slice_1/stack_1"
+  input: "generator/pre_fc/strided_slice_1/stack_2"
+  attr {
+    key: "begin_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "ellipsis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "end_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "new_axis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "shrink_axis_mask"
+    value {
+      i: 1
+    }
+  }
+}
+node {
+  name: "generator/pre_fc/Reshape_1/shape"
+  op: "Pack"
+  input: "generator/pre_fc/strided_slice"
+  input: "generator/pre_fc/strided_slice_1"
+  input: "generator/pre_fc/Reshape_1/shape/2"
+  attr {
+    key: "axis"
+    value {
+      i: 0
+    }
+  }
+}
+node {
+  name: "generator/pre_fc/Reshape_1"
+  op: "Reshape"
+  input: "generator/pre_fc/Add"
+  input: "generator/pre_fc/Reshape_1/shape"
+}
+node {
+  name: "generator/pre_fc/Tanh"
+  op: "Tanh"
+  input: "generator/pre_fc/Reshape_1"
+}
+node {
+  name: "generator/GatherV2"
+  op: "GatherV2"
+  input: "generator/prep_states_in_raw"
+  input: "generator/GatherV2/indices"
+  input: "generator/GatherV2/axis"
+  attr {
+    key: "Taxis"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "Tindices"
+    value {
+      type: DT_INT32
+    }
+  }
+  attr {
+    key: "Tparams"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "batch_dims"
+    value {
+      i: 0
+    }
+  }
+}
+node {
+  name: "generator/unstack"
+  op: "Unpack"
+  input: "generator/GatherV2"
+  attr {
+    key: "axis"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "num"
+    value {
+      i: 3
+    }
+  }
+}
+node {
+  name: "generator/strided_slice_1"
+  op: "StridedSlice"
+  input: "generator/unstack"
+  input: "generator/strided_slice_1/stack"
+  input: "generator/strided_slice_1/stack_1"
+  input: "generator/strided_slice_1/stack_2"
+  attr {
+    key: "begin_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "ellipsis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "end_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "new_axis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "shrink_axis_mask"
+    value {
+      i: 1
+    }
+  }
+}
+node {
+  name: "generator/strided_slice_2"
+  op: "StridedSlice"
+  input: "generator/unstack"
+  input: "generator/strided_slice_2/stack"
+  input: "generator/strided_slice_2/stack_1"
+  input: "generator/strided_slice_2/stack_2"
+  attr {
+    key: "begin_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "ellipsis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "end_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "new_axis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "shrink_axis_mask"
+    value {
+      i: 1
+    }
+  }
+}
+node {
+  name: "generator/strided_slice_3"
+  op: "StridedSlice"
+  input: "generator/unstack:1"
+  input: "generator/strided_slice_3/stack"
+  input: "generator/strided_slice_3/stack_1"
+  input: "generator/strided_slice_3/stack_2"
+  attr {
+    key: "begin_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "ellipsis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "end_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "new_axis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "shrink_axis_mask"
+    value {
+      i: 1
+    }
+  }
+}
+node {
+  name: "generator/strided_slice_4"
+  op: "StridedSlice"
+  input: "generator/unstack:1"
+  input: "generator/strided_slice_4/stack"
+  input: "generator/strided_slice_4/stack_1"
+  input: "generator/strided_slice_4/stack_2"
+  attr {
+    key: "begin_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "ellipsis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "end_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "new_axis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "shrink_axis_mask"
+    value {
+      i: 1
+    }
+  }
+}
+node {
+  name: "generator/strided_slice_5"
+  op: "StridedSlice"
+  input: "generator/unstack:2"
+  input: "generator/strided_slice_5/stack"
+  input: "generator/strided_slice_5/stack_1"
+  input: "generator/strided_slice_5/stack_2"
+  attr {
+    key: "begin_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "ellipsis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "end_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "new_axis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "shrink_axis_mask"
+    value {
+      i: 1
+    }
+  }
+}
+node {
+  name: "generator/strided_slice_6"
+  op: "StridedSlice"
+  input: "generator/unstack:2"
+  input: "generator/strided_slice_6/stack"
+  input: "generator/strided_slice_6/stack_1"
+  input: "generator/strided_slice_6/stack_2"
+  attr {
+    key: "begin_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "ellipsis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "end_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "new_axis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "shrink_axis_mask"
+    value {
+      i: 1
+    }
+  }
+}
+node {
+  name: "generator/rnn/range"
+  op: "Range"
+  input: "generator/rnn/range/start"
+  input: "generator/rnn/Rank"
+  input: "generator/rnn/range/delta"
+}
+node {
+  name: "generator/rnn/concat"
+  op: "ConcatV2"
+  input: "generator/rnn/concat/values_0"
+  input: "generator/rnn/range"
+  input: "generator/rnn/concat/axis"
+}
+node {
+  name: "generator/rnn/transpose"
+  op: "Transpose"
+  input: "generator/pre_fc/Tanh"
+  input: "generator/rnn/concat"
+}
+node {
+  name: "generator/rnn/Shape_1"
+  op: "Shape"
+  input: "generator/rnn/transpose"
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "generator/rnn/strided_slice_1"
+  op: "StridedSlice"
+  input: "generator/rnn/Shape_1"
+  input: "generator/rnn/strided_slice_1/stack"
+  input: "generator/rnn/strided_slice_1/stack_1"
+  input: "generator/rnn/strided_slice_1/stack_2"
+  attr {
+    key: "begin_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "ellipsis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "end_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "new_axis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "shrink_axis_mask"
+    value {
+      i: 1
+    }
+  }
+}
+node {
+  name: "generator/rnn/TensorArray"
+  op: "TensorArrayV3"
+  input: "generator/rnn/strided_slice_1"
+  attr {
+    key: "clear_after_read"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "dynamic_size"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "element_shape"
+    value {
+      shape {
+        dim {
+          size: -1
+        }
+        dim {
+          size: 256
+        }
+      }
+    }
+  }
+  attr {
+    key: "identical_element_shapes"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "tensor_array_name"
+    value {
+      s: "generator/rnn/dynamic_rnn/output_0"
+    }
+  }
+}
+node {
+  name: "generator/rnn/TensorArray_1"
+  op: "TensorArrayV3"
+  input: "generator/rnn/strided_slice_1"
+  attr {
+    key: "clear_after_read"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "dynamic_size"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "element_shape"
+    value {
+      shape {
+        dim {
+          size: -1
+        }
+        dim {
+          size: 256
+        }
+      }
+    }
+  }
+  attr {
+    key: "identical_element_shapes"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "tensor_array_name"
+    value {
+      s: "generator/rnn/dynamic_rnn/input_0"
+    }
+  }
+}
+node {
+  name: "generator/rnn/TensorArrayUnstack/Shape"
+  op: "Shape"
+  input: "generator/rnn/transpose"
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "generator/rnn/TensorArrayUnstack/strided_slice"
+  op: "StridedSlice"
+  input: "generator/rnn/TensorArrayUnstack/Shape"
+  input: "generator/rnn/TensorArrayUnstack/strided_slice/stack"
+  input: "generator/rnn/TensorArrayUnstack/strided_slice/stack_1"
+  input: "generator/rnn/TensorArrayUnstack/strided_slice/stack_2"
+  attr {
+    key: "begin_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "ellipsis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "end_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "new_axis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "shrink_axis_mask"
+    value {
+      i: 1
+    }
+  }
+}
+node {
+  name: "generator/rnn/TensorArrayUnstack/range"
+  op: "Range"
+  input: "generator/rnn/TensorArrayUnstack/range/start"
+  input: "generator/rnn/TensorArrayUnstack/strided_slice"
+  input: "generator/rnn/TensorArrayUnstack/range/delta"
+}
+node {
+  name: "generator/rnn/TensorArrayUnstack/TensorArrayScatter/TensorArrayScatterV3"
+  op: "TensorArrayScatterV3"
+  input: "generator/rnn/TensorArray_1"
+  input: "generator/rnn/TensorArrayUnstack/range"
+  input: "generator/rnn/transpose"
+  input: "generator/rnn/TensorArray_1:1"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn/transpose"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn/Maximum"
+  op: "Maximum"
+  input: "generator/rnn/Maximum/x"
+  input: "generator/rnn/strided_slice_1"
+}
+node {
+  name: "generator/rnn/Minimum"
+  op: "Minimum"
+  input: "generator/rnn/strided_slice_1"
+  input: "generator/rnn/Maximum"
+}
+node {
+  name: "generator/rnn/while/Enter"
+  op: "Enter"
+  input: "generator/rnn/while/iteration_counter"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/Enter_1"
+  op: "Enter"
+  input: "generator/rnn/time"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/Enter_2"
+  op: "Enter"
+  input: "generator/rnn/TensorArray:1"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/Enter_3"
+  op: "Enter"
+  input: "generator/strided_slice_1"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/Enter_4"
+  op: "Enter"
+  input: "generator/strided_slice_2"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/Merge"
+  op: "Merge"
+  input: "generator/rnn/while/Enter"
+  input: "generator/rnn/while/NextIteration"
+}
+node {
+  name: "generator/rnn/while/Merge_1"
+  op: "Merge"
+  input: "generator/rnn/while/Enter_1"
+  input: "generator/rnn/while/NextIteration_1"
+}
+node {
+  name: "generator/rnn/while/Merge_2"
+  op: "Merge"
+  input: "generator/rnn/while/Enter_2"
+  input: "generator/rnn/while/NextIteration_2"
+}
+node {
+  name: "generator/rnn/while/Merge_3"
+  op: "Merge"
+  input: "generator/rnn/while/Enter_3"
+  input: "generator/rnn/while/NextIteration_3"
+}
+node {
+  name: "generator/rnn/while/Merge_4"
+  op: "Merge"
+  input: "generator/rnn/while/Enter_4"
+  input: "generator/rnn/while/NextIteration_4"
+}
+node {
+  name: "generator/rnn/while/Less/Enter"
+  op: "Enter"
+  input: "generator/rnn/strided_slice_1"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/Less"
+  op: "Less"
+  input: "generator/rnn/while/Merge"
+  input: "generator/rnn/while/Less/Enter"
+}
+node {
+  name: "generator/rnn/while/Less_1/Enter"
+  op: "Enter"
+  input: "generator/rnn/Minimum"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/Less_1"
+  op: "Less"
+  input: "generator/rnn/while/Merge_1"
+  input: "generator/rnn/while/Less_1/Enter"
+}
+node {
+  name: "generator/rnn/while/LogicalAnd"
+  op: "LogicalAnd"
+  input: "generator/rnn/while/Less"
+  input: "generator/rnn/while/Less_1"
+}
+node {
+  name: "generator/rnn/while/LoopCond"
+  op: "LoopCond"
+  input: "generator/rnn/while/LogicalAnd"
+}
+node {
+  name: "generator/rnn/while/Switch"
+  op: "Switch"
+  input: "generator/rnn/while/Merge"
+  input: "generator/rnn/while/LoopCond"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn/while/Merge"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/Switch_1"
+  op: "Switch"
+  input: "generator/rnn/while/Merge_1"
+  input: "generator/rnn/while/LoopCond"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn/while/Merge_1"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/Switch_2"
+  op: "Switch"
+  input: "generator/rnn/while/Merge_2"
+  input: "generator/rnn/while/LoopCond"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn/while/Merge_2"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/Switch_3"
+  op: "Switch"
+  input: "generator/rnn/while/Merge_3"
+  input: "generator/rnn/while/LoopCond"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn/while/Merge_3"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/Switch_4"
+  op: "Switch"
+  input: "generator/rnn/while/Merge_4"
+  input: "generator/rnn/while/LoopCond"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn/while/Merge_4"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/Identity"
+  op: "Identity"
+  input: "generator/rnn/while/Switch:1"
+}
+node {
+  name: "generator/rnn/while/Identity_1"
+  op: "Identity"
+  input: "generator/rnn/while/Switch_1:1"
+}
+node {
+  name: "generator/rnn/while/Identity_2"
+  op: "Identity"
+  input: "generator/rnn/while/Switch_2:1"
+}
+node {
+  name: "generator/rnn/while/Identity_3"
+  op: "Identity"
+  input: "generator/rnn/while/Switch_3:1"
+}
+node {
+  name: "generator/rnn/while/Identity_4"
+  op: "Identity"
+  input: "generator/rnn/while/Switch_4:1"
+}
+node {
+  name: "generator/rnn/while/add"
+  op: "Add"
+  input: "generator/rnn/while/Identity"
+  input: "generator/rnn/while/add/y"
+}
+node {
+  name: "generator/rnn/while/TensorArrayReadV3/Enter"
+  op: "Enter"
+  input: "generator/rnn/TensorArray_1"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/TensorArrayReadV3/Enter_1"
+  op: "Enter"
+  input: "generator/rnn/TensorArrayUnstack/TensorArrayScatter/TensorArrayScatterV3"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/TensorArrayReadV3"
+  op: "TensorArrayReadV3"
+  input: "generator/rnn/while/TensorArrayReadV3/Enter"
+  input: "generator/rnn/while/Identity_1"
+  input: "generator/rnn/while/TensorArrayReadV3/Enter_1"
+  attr {
+    key: "dtype"
+    value {
+      type: DT_FLOAT
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/sub/Enter"
+  op: "Enter"
+  input: "generator/strided_slice"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/sub"
+  op: "Sub"
+  input: "generator/rnn/while/sub/x"
+  input: "generator/rnn/while/sub/Enter"
+}
+node {
+  name: "generator/rnn/while/dropout/Shape"
+  op: "Shape"
+  input: "generator/rnn/while/TensorArrayReadV3"
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/dropout/random_uniform/RandomUniform"
+  op: "RandomUniform"
+  input: "generator/rnn/while/dropout/Shape"
+  attr {
+    key: "dtype"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "seed"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "seed2"
+    value {
+      i: 0
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/dropout/random_uniform/sub"
+  op: "Sub"
+  input: "generator/rnn/while/dropout/random_uniform/max"
+  input: "generator/rnn/while/dropout/random_uniform/min"
+}
+node {
+  name: "generator/rnn/while/dropout/random_uniform/mul"
+  op: "Mul"
+  input: "generator/rnn/while/dropout/random_uniform/RandomUniform"
+  input: "generator/rnn/while/dropout/random_uniform/sub"
+}
+node {
+  name: "generator/rnn/while/dropout/random_uniform"
+  op: "Add"
+  input: "generator/rnn/while/dropout/random_uniform/mul"
+  input: "generator/rnn/while/dropout/random_uniform/min"
+}
+node {
+  name: "generator/rnn/while/dropout/sub"
+  op: "Sub"
+  input: "generator/rnn/while/dropout/sub/x"
+  input: "generator/rnn/while/sub"
+}
+node {
+  name: "generator/rnn/while/dropout/truediv"
+  op: "RealDiv"
+  input: "generator/rnn/while/dropout/truediv/x"
+  input: "generator/rnn/while/dropout/sub"
+}
+node {
+  name: "generator/rnn/while/dropout/GreaterEqual"
+  op: "GreaterEqual"
+  input: "generator/rnn/while/dropout/random_uniform"
+  input: "generator/rnn/while/sub"
+}
+node {
+  name: "generator/rnn/while/dropout/mul"
+  op: "Mul"
+  input: "generator/rnn/while/TensorArrayReadV3"
+  input: "generator/rnn/while/dropout/truediv"
+}
+node {
+  name: "generator/rnn/while/dropout/Cast"
+  op: "Cast"
+  input: "generator/rnn/while/dropout/GreaterEqual"
+  attr {
+    key: "DstT"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "SrcT"
+    value {
+      type: DT_BOOL
+    }
+  }
+  attr {
+    key: "Truncate"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/dropout/mul_1"
+  op: "Mul"
+  input: "generator/rnn/while/dropout/mul"
+  input: "generator/rnn/while/dropout/Cast"
+}
+node {
+  name: "generator/rnn/lstm_cell_layer_0_channel_0/kernel/read"
+  op: "Identity"
+  input: "generator/rnn/lstm_cell_layer_0_channel_0/kernel"
+}
+node {
+  name: "generator/rnn/lstm_cell_layer_0_channel_0/bias/read"
+  op: "Identity"
+  input: "generator/rnn/lstm_cell_layer_0_channel_0/bias"
+}
+node {
+  name: "generator/rnn/while/lstm_cell_layer_0_channel_0/concat"
+  op: "ConcatV2"
+  input: "generator/rnn/while/dropout/mul_1"
+  input: "generator/rnn/while/Identity_4"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/concat/axis"
+}
+node {
+  name: "generator/rnn/while/lstm_cell_layer_0_channel_0/MatMul/Enter"
+  op: "Enter"
+  input: "generator/rnn/lstm_cell_layer_0_channel_0/kernel/read"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/lstm_cell_layer_0_channel_0/MatMul"
+  op: "MatMul"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/concat"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/MatMul/Enter"
+  attr {
+    key: "transpose_a"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "transpose_b"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/lstm_cell_layer_0_channel_0/BiasAdd/Enter"
+  op: "Enter"
+  input: "generator/rnn/lstm_cell_layer_0_channel_0/bias/read"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/lstm_cell_layer_0_channel_0/BiasAdd"
+  op: "BiasAdd"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/MatMul"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/BiasAdd/Enter"
+}
+node {
+  name: "generator/rnn/while/lstm_cell_layer_0_channel_0/split"
+  op: "Split"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/split/split_dim"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/BiasAdd"
+  attr {
+    key: "num_split"
+    value {
+      i: 4
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/lstm_cell_layer_0_channel_0/add"
+  op: "Add"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/split:2"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/add/y"
+}
+node {
+  name: "generator/rnn/while/lstm_cell_layer_0_channel_0/Sigmoid"
+  op: "Sigmoid"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/add"
+}
+node {
+  name: "generator/rnn/while/lstm_cell_layer_0_channel_0/mul"
+  op: "Mul"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/Sigmoid"
+  input: "generator/rnn/while/Identity_3"
+}
+node {
+  name: "generator/rnn/while/lstm_cell_layer_0_channel_0/Sigmoid_1"
+  op: "Sigmoid"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/split"
+}
+node {
+  name: "generator/rnn/while/lstm_cell_layer_0_channel_0/Tanh"
+  op: "Tanh"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/split:1"
+}
+node {
+  name: "generator/rnn/while/lstm_cell_layer_0_channel_0/mul_1"
+  op: "Mul"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/Sigmoid_1"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/Tanh"
+}
+node {
+  name: "generator/rnn/while/lstm_cell_layer_0_channel_0/add_1"
+  op: "Add"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/mul"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/mul_1"
+}
+node {
+  name: "generator/rnn/while/lstm_cell_layer_0_channel_0/Sigmoid_2"
+  op: "Sigmoid"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/split:3"
+}
+node {
+  name: "generator/rnn/while/lstm_cell_layer_0_channel_0/Tanh_1"
+  op: "Tanh"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/add_1"
+}
+node {
+  name: "generator/rnn/while/lstm_cell_layer_0_channel_0/mul_2"
+  op: "Mul"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/Sigmoid_2"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/Tanh_1"
+}
+node {
+  name: "generator/rnn/while/TensorArrayWrite/TensorArrayWriteV3/Enter"
+  op: "Enter"
+  input: "generator/rnn/TensorArray"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn/while/lstm_cell_layer_0_channel_0/mul_2"
+      }
+    }
+  }
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/TensorArrayWrite/TensorArrayWriteV3"
+  op: "TensorArrayWriteV3"
+  input: "generator/rnn/while/TensorArrayWrite/TensorArrayWriteV3/Enter"
+  input: "generator/rnn/while/Identity_1"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/mul_2"
+  input: "generator/rnn/while/Identity_2"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn/while/lstm_cell_layer_0_channel_0/mul_2"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn/while/add_1"
+  op: "Add"
+  input: "generator/rnn/while/Identity_1"
+  input: "generator/rnn/while/add_1/y"
+}
+node {
+  name: "generator/rnn/while/NextIteration"
+  op: "NextIteration"
+  input: "generator/rnn/while/add"
+}
+node {
+  name: "generator/rnn/while/NextIteration_1"
+  op: "NextIteration"
+  input: "generator/rnn/while/add_1"
+}
+node {
+  name: "generator/rnn/while/NextIteration_2"
+  op: "NextIteration"
+  input: "generator/rnn/while/TensorArrayWrite/TensorArrayWriteV3"
+}
+node {
+  name: "generator/rnn/while/NextIteration_3"
+  op: "NextIteration"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/add_1"
+}
+node {
+  name: "generator/rnn/while/NextIteration_4"
+  op: "NextIteration"
+  input: "generator/rnn/while/lstm_cell_layer_0_channel_0/mul_2"
+}
+node {
+  name: "generator/rnn/while/Exit_2"
+  op: "Exit"
+  input: "generator/rnn/while/Switch_2"
+}
+node {
+  name: "generator/rnn/while/Exit_3"
+  op: "Exit"
+  input: "generator/rnn/while/Switch_3"
+}
+node {
+  name: "generator/rnn/while/Exit_4"
+  op: "Exit"
+  input: "generator/rnn/while/Switch_4"
+}
+node {
+  name: "generator/rnn/TensorArrayStack/TensorArraySizeV3"
+  op: "TensorArraySizeV3"
+  input: "generator/rnn/TensorArray"
+  input: "generator/rnn/while/Exit_2"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn/TensorArray"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn/TensorArrayStack/range"
+  op: "Range"
+  input: "generator/rnn/TensorArrayStack/range/start"
+  input: "generator/rnn/TensorArrayStack/TensorArraySizeV3"
+  input: "generator/rnn/TensorArrayStack/range/delta"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn/TensorArray"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn/TensorArrayStack/TensorArrayGatherV3"
+  op: "TensorArrayGatherV3"
+  input: "generator/rnn/TensorArray"
+  input: "generator/rnn/TensorArrayStack/range"
+  input: "generator/rnn/while/Exit_2"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn/TensorArray"
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "element_shape"
+    value {
+      shape {
+        dim {
+          size: -1
+        }
+        dim {
+          size: 256
+        }
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn/range_1"
+  op: "Range"
+  input: "generator/rnn/range_1/start"
+  input: "generator/rnn/Rank_1"
+  input: "generator/rnn/range_1/delta"
+}
+node {
+  name: "generator/rnn/concat_2"
+  op: "ConcatV2"
+  input: "generator/rnn/concat_2/values_0"
+  input: "generator/rnn/range_1"
+  input: "generator/rnn/concat_2/axis"
+}
+node {
+  name: "generator/rnn/transpose_1"
+  op: "Transpose"
+  input: "generator/rnn/TensorArrayStack/TensorArrayGatherV3"
+  input: "generator/rnn/concat_2"
+}
+node {
+  name: "generator/sub"
+  op: "Sub"
+  input: "generator/pre_fc/Tanh"
+  input: "generator/rnn/transpose_1"
+}
+node {
+  name: "generator/rnn_1/range"
+  op: "Range"
+  input: "generator/rnn_1/range/start"
+  input: "generator/rnn_1/Rank"
+  input: "generator/rnn_1/range/delta"
+}
+node {
+  name: "generator/rnn_1/concat"
+  op: "ConcatV2"
+  input: "generator/rnn_1/concat/values_0"
+  input: "generator/rnn_1/range"
+  input: "generator/rnn_1/concat/axis"
+}
+node {
+  name: "generator/rnn_1/transpose"
+  op: "Transpose"
+  input: "generator/sub"
+  input: "generator/rnn_1/concat"
+}
+node {
+  name: "generator/rnn_1/Shape_1"
+  op: "Shape"
+  input: "generator/rnn_1/transpose"
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/strided_slice_1"
+  op: "StridedSlice"
+  input: "generator/rnn_1/Shape_1"
+  input: "generator/rnn_1/strided_slice_1/stack"
+  input: "generator/rnn_1/strided_slice_1/stack_1"
+  input: "generator/rnn_1/strided_slice_1/stack_2"
+  attr {
+    key: "begin_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "ellipsis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "end_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "new_axis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "shrink_axis_mask"
+    value {
+      i: 1
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/TensorArray"
+  op: "TensorArrayV3"
+  input: "generator/rnn_1/strided_slice_1"
+  attr {
+    key: "clear_after_read"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "dynamic_size"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "element_shape"
+    value {
+      shape {
+        dim {
+          size: -1
+        }
+        dim {
+          size: 256
+        }
+      }
+    }
+  }
+  attr {
+    key: "identical_element_shapes"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "tensor_array_name"
+    value {
+      s: "generator/rnn_1/dynamic_rnn/output_0"
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/TensorArray_1"
+  op: "TensorArrayV3"
+  input: "generator/rnn_1/strided_slice_1"
+  attr {
+    key: "clear_after_read"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "dynamic_size"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "element_shape"
+    value {
+      shape {
+        dim {
+          size: -1
+        }
+        dim {
+          size: 256
+        }
+      }
+    }
+  }
+  attr {
+    key: "identical_element_shapes"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "tensor_array_name"
+    value {
+      s: "generator/rnn_1/dynamic_rnn/input_0"
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/TensorArrayUnstack/Shape"
+  op: "Shape"
+  input: "generator/rnn_1/transpose"
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/TensorArrayUnstack/strided_slice"
+  op: "StridedSlice"
+  input: "generator/rnn_1/TensorArrayUnstack/Shape"
+  input: "generator/rnn_1/TensorArrayUnstack/strided_slice/stack"
+  input: "generator/rnn_1/TensorArrayUnstack/strided_slice/stack_1"
+  input: "generator/rnn_1/TensorArrayUnstack/strided_slice/stack_2"
+  attr {
+    key: "begin_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "ellipsis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "end_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "new_axis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "shrink_axis_mask"
+    value {
+      i: 1
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/TensorArrayUnstack/range"
+  op: "Range"
+  input: "generator/rnn_1/TensorArrayUnstack/range/start"
+  input: "generator/rnn_1/TensorArrayUnstack/strided_slice"
+  input: "generator/rnn_1/TensorArrayUnstack/range/delta"
+}
+node {
+  name: "generator/rnn_1/TensorArrayUnstack/TensorArrayScatter/TensorArrayScatterV3"
+  op: "TensorArrayScatterV3"
+  input: "generator/rnn_1/TensorArray_1"
+  input: "generator/rnn_1/TensorArrayUnstack/range"
+  input: "generator/rnn_1/transpose"
+  input: "generator/rnn_1/TensorArray_1:1"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn_1/transpose"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/Maximum"
+  op: "Maximum"
+  input: "generator/rnn_1/Maximum/x"
+  input: "generator/rnn_1/strided_slice_1"
+}
+node {
+  name: "generator/rnn_1/Minimum"
+  op: "Minimum"
+  input: "generator/rnn_1/strided_slice_1"
+  input: "generator/rnn_1/Maximum"
+}
+node {
+  name: "generator/rnn_1/while/Enter"
+  op: "Enter"
+  input: "generator/rnn_1/while/iteration_counter"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_1/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/Enter_1"
+  op: "Enter"
+  input: "generator/rnn_1/time"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_1/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/Enter_2"
+  op: "Enter"
+  input: "generator/rnn_1/TensorArray:1"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_1/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/Enter_3"
+  op: "Enter"
+  input: "generator/strided_slice_3"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_1/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/Enter_4"
+  op: "Enter"
+  input: "generator/strided_slice_4"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_1/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/Merge"
+  op: "Merge"
+  input: "generator/rnn_1/while/Enter"
+  input: "generator/rnn_1/while/NextIteration"
+}
+node {
+  name: "generator/rnn_1/while/Merge_1"
+  op: "Merge"
+  input: "generator/rnn_1/while/Enter_1"
+  input: "generator/rnn_1/while/NextIteration_1"
+}
+node {
+  name: "generator/rnn_1/while/Merge_2"
+  op: "Merge"
+  input: "generator/rnn_1/while/Enter_2"
+  input: "generator/rnn_1/while/NextIteration_2"
+}
+node {
+  name: "generator/rnn_1/while/Merge_3"
+  op: "Merge"
+  input: "generator/rnn_1/while/Enter_3"
+  input: "generator/rnn_1/while/NextIteration_3"
+}
+node {
+  name: "generator/rnn_1/while/Merge_4"
+  op: "Merge"
+  input: "generator/rnn_1/while/Enter_4"
+  input: "generator/rnn_1/while/NextIteration_4"
+}
+node {
+  name: "generator/rnn_1/while/Less/Enter"
+  op: "Enter"
+  input: "generator/rnn_1/strided_slice_1"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_1/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/Less"
+  op: "Less"
+  input: "generator/rnn_1/while/Merge"
+  input: "generator/rnn_1/while/Less/Enter"
+}
+node {
+  name: "generator/rnn_1/while/Less_1/Enter"
+  op: "Enter"
+  input: "generator/rnn_1/Minimum"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_1/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/Less_1"
+  op: "Less"
+  input: "generator/rnn_1/while/Merge_1"
+  input: "generator/rnn_1/while/Less_1/Enter"
+}
+node {
+  name: "generator/rnn_1/while/LogicalAnd"
+  op: "LogicalAnd"
+  input: "generator/rnn_1/while/Less"
+  input: "generator/rnn_1/while/Less_1"
+}
+node {
+  name: "generator/rnn_1/while/LoopCond"
+  op: "LoopCond"
+  input: "generator/rnn_1/while/LogicalAnd"
+}
+node {
+  name: "generator/rnn_1/while/Switch"
+  op: "Switch"
+  input: "generator/rnn_1/while/Merge"
+  input: "generator/rnn_1/while/LoopCond"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn_1/while/Merge"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/Switch_1"
+  op: "Switch"
+  input: "generator/rnn_1/while/Merge_1"
+  input: "generator/rnn_1/while/LoopCond"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn_1/while/Merge_1"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/Switch_2"
+  op: "Switch"
+  input: "generator/rnn_1/while/Merge_2"
+  input: "generator/rnn_1/while/LoopCond"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn_1/while/Merge_2"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/Switch_3"
+  op: "Switch"
+  input: "generator/rnn_1/while/Merge_3"
+  input: "generator/rnn_1/while/LoopCond"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn_1/while/Merge_3"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/Switch_4"
+  op: "Switch"
+  input: "generator/rnn_1/while/Merge_4"
+  input: "generator/rnn_1/while/LoopCond"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn_1/while/Merge_4"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/Identity"
+  op: "Identity"
+  input: "generator/rnn_1/while/Switch:1"
+}
+node {
+  name: "generator/rnn_1/while/Identity_1"
+  op: "Identity"
+  input: "generator/rnn_1/while/Switch_1:1"
+}
+node {
+  name: "generator/rnn_1/while/Identity_2"
+  op: "Identity"
+  input: "generator/rnn_1/while/Switch_2:1"
+}
+node {
+  name: "generator/rnn_1/while/Identity_3"
+  op: "Identity"
+  input: "generator/rnn_1/while/Switch_3:1"
+}
+node {
+  name: "generator/rnn_1/while/Identity_4"
+  op: "Identity"
+  input: "generator/rnn_1/while/Switch_4:1"
+}
+node {
+  name: "generator/rnn_1/while/add"
+  op: "Add"
+  input: "generator/rnn_1/while/Identity"
+  input: "generator/rnn_1/while/add/y"
+}
+node {
+  name: "generator/rnn_1/while/TensorArrayReadV3/Enter"
+  op: "Enter"
+  input: "generator/rnn_1/TensorArray_1"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_1/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/TensorArrayReadV3/Enter_1"
+  op: "Enter"
+  input: "generator/rnn_1/TensorArrayUnstack/TensorArrayScatter/TensorArrayScatterV3"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_1/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/TensorArrayReadV3"
+  op: "TensorArrayReadV3"
+  input: "generator/rnn_1/while/TensorArrayReadV3/Enter"
+  input: "generator/rnn_1/while/Identity_1"
+  input: "generator/rnn_1/while/TensorArrayReadV3/Enter_1"
+  attr {
+    key: "dtype"
+    value {
+      type: DT_FLOAT
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/sub/Enter"
+  op: "Enter"
+  input: "generator/strided_slice"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_1/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/sub"
+  op: "Sub"
+  input: "generator/rnn_1/while/sub/x"
+  input: "generator/rnn_1/while/sub/Enter"
+}
+node {
+  name: "generator/rnn_1/while/dropout/Shape"
+  op: "Shape"
+  input: "generator/rnn_1/while/TensorArrayReadV3"
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/dropout/random_uniform/RandomUniform"
+  op: "RandomUniform"
+  input: "generator/rnn_1/while/dropout/Shape"
+  attr {
+    key: "dtype"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "seed"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "seed2"
+    value {
+      i: 0
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/dropout/random_uniform/sub"
+  op: "Sub"
+  input: "generator/rnn_1/while/dropout/random_uniform/max"
+  input: "generator/rnn_1/while/dropout/random_uniform/min"
+}
+node {
+  name: "generator/rnn_1/while/dropout/random_uniform/mul"
+  op: "Mul"
+  input: "generator/rnn_1/while/dropout/random_uniform/RandomUniform"
+  input: "generator/rnn_1/while/dropout/random_uniform/sub"
+}
+node {
+  name: "generator/rnn_1/while/dropout/random_uniform"
+  op: "Add"
+  input: "generator/rnn_1/while/dropout/random_uniform/mul"
+  input: "generator/rnn_1/while/dropout/random_uniform/min"
+}
+node {
+  name: "generator/rnn_1/while/dropout/sub"
+  op: "Sub"
+  input: "generator/rnn_1/while/dropout/sub/x"
+  input: "generator/rnn_1/while/sub"
+}
+node {
+  name: "generator/rnn_1/while/dropout/truediv"
+  op: "RealDiv"
+  input: "generator/rnn_1/while/dropout/truediv/x"
+  input: "generator/rnn_1/while/dropout/sub"
+}
+node {
+  name: "generator/rnn_1/while/dropout/GreaterEqual"
+  op: "GreaterEqual"
+  input: "generator/rnn_1/while/dropout/random_uniform"
+  input: "generator/rnn_1/while/sub"
+}
+node {
+  name: "generator/rnn_1/while/dropout/mul"
+  op: "Mul"
+  input: "generator/rnn_1/while/TensorArrayReadV3"
+  input: "generator/rnn_1/while/dropout/truediv"
+}
+node {
+  name: "generator/rnn_1/while/dropout/Cast"
+  op: "Cast"
+  input: "generator/rnn_1/while/dropout/GreaterEqual"
+  attr {
+    key: "DstT"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "SrcT"
+    value {
+      type: DT_BOOL
+    }
+  }
+  attr {
+    key: "Truncate"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/dropout/mul_1"
+  op: "Mul"
+  input: "generator/rnn_1/while/dropout/mul"
+  input: "generator/rnn_1/while/dropout/Cast"
+}
+node {
+  name: "generator/rnn/lstm_cell_layer_1_channel_0/kernel/read"
+  op: "Identity"
+  input: "generator/rnn/lstm_cell_layer_1_channel_0/kernel"
+}
+node {
+  name: "generator/rnn/lstm_cell_layer_1_channel_0/bias/read"
+  op: "Identity"
+  input: "generator/rnn/lstm_cell_layer_1_channel_0/bias"
+}
+node {
+  name: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/concat"
+  op: "ConcatV2"
+  input: "generator/rnn_1/while/dropout/mul_1"
+  input: "generator/rnn_1/while/Identity_4"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/concat/axis"
+}
+node {
+  name: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/MatMul/Enter"
+  op: "Enter"
+  input: "generator/rnn/lstm_cell_layer_1_channel_0/kernel/read"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_1/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/MatMul"
+  op: "MatMul"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/concat"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/MatMul/Enter"
+  attr {
+    key: "transpose_a"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "transpose_b"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/BiasAdd/Enter"
+  op: "Enter"
+  input: "generator/rnn/lstm_cell_layer_1_channel_0/bias/read"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_1/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/BiasAdd"
+  op: "BiasAdd"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/MatMul"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/BiasAdd/Enter"
+}
+node {
+  name: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/split"
+  op: "Split"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/split/split_dim"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/BiasAdd"
+  attr {
+    key: "num_split"
+    value {
+      i: 4
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/add"
+  op: "Add"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/split:2"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/add/y"
+}
+node {
+  name: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/Sigmoid"
+  op: "Sigmoid"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/add"
+}
+node {
+  name: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/mul"
+  op: "Mul"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/Sigmoid"
+  input: "generator/rnn_1/while/Identity_3"
+}
+node {
+  name: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/Sigmoid_1"
+  op: "Sigmoid"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/split"
+}
+node {
+  name: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/Tanh"
+  op: "Tanh"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/split:1"
+}
+node {
+  name: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/mul_1"
+  op: "Mul"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/Sigmoid_1"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/Tanh"
+}
+node {
+  name: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/add_1"
+  op: "Add"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/mul"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/mul_1"
+}
+node {
+  name: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/Sigmoid_2"
+  op: "Sigmoid"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/split:3"
+}
+node {
+  name: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/Tanh_1"
+  op: "Tanh"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/add_1"
+}
+node {
+  name: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/mul_2"
+  op: "Mul"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/Sigmoid_2"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/Tanh_1"
+}
+node {
+  name: "generator/rnn_1/while/TensorArrayWrite/TensorArrayWriteV3/Enter"
+  op: "Enter"
+  input: "generator/rnn_1/TensorArray"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn_1/while/lstm_cell_layer_1_channel_0/mul_2"
+      }
+    }
+  }
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_1/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/TensorArrayWrite/TensorArrayWriteV3"
+  op: "TensorArrayWriteV3"
+  input: "generator/rnn_1/while/TensorArrayWrite/TensorArrayWriteV3/Enter"
+  input: "generator/rnn_1/while/Identity_1"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/mul_2"
+  input: "generator/rnn_1/while/Identity_2"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn_1/while/lstm_cell_layer_1_channel_0/mul_2"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/while/add_1"
+  op: "Add"
+  input: "generator/rnn_1/while/Identity_1"
+  input: "generator/rnn_1/while/add_1/y"
+}
+node {
+  name: "generator/rnn_1/while/NextIteration"
+  op: "NextIteration"
+  input: "generator/rnn_1/while/add"
+}
+node {
+  name: "generator/rnn_1/while/NextIteration_1"
+  op: "NextIteration"
+  input: "generator/rnn_1/while/add_1"
+}
+node {
+  name: "generator/rnn_1/while/NextIteration_2"
+  op: "NextIteration"
+  input: "generator/rnn_1/while/TensorArrayWrite/TensorArrayWriteV3"
+}
+node {
+  name: "generator/rnn_1/while/NextIteration_3"
+  op: "NextIteration"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/add_1"
+}
+node {
+  name: "generator/rnn_1/while/NextIteration_4"
+  op: "NextIteration"
+  input: "generator/rnn_1/while/lstm_cell_layer_1_channel_0/mul_2"
+}
+node {
+  name: "generator/rnn_1/while/Exit_2"
+  op: "Exit"
+  input: "generator/rnn_1/while/Switch_2"
+}
+node {
+  name: "generator/rnn_1/while/Exit_3"
+  op: "Exit"
+  input: "generator/rnn_1/while/Switch_3"
+}
+node {
+  name: "generator/rnn_1/while/Exit_4"
+  op: "Exit"
+  input: "generator/rnn_1/while/Switch_4"
+}
+node {
+  name: "generator/rnn_1/TensorArrayStack/TensorArraySizeV3"
+  op: "TensorArraySizeV3"
+  input: "generator/rnn_1/TensorArray"
+  input: "generator/rnn_1/while/Exit_2"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn_1/TensorArray"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/TensorArrayStack/range"
+  op: "Range"
+  input: "generator/rnn_1/TensorArrayStack/range/start"
+  input: "generator/rnn_1/TensorArrayStack/TensorArraySizeV3"
+  input: "generator/rnn_1/TensorArrayStack/range/delta"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn_1/TensorArray"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/TensorArrayStack/TensorArrayGatherV3"
+  op: "TensorArrayGatherV3"
+  input: "generator/rnn_1/TensorArray"
+  input: "generator/rnn_1/TensorArrayStack/range"
+  input: "generator/rnn_1/while/Exit_2"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn_1/TensorArray"
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "element_shape"
+    value {
+      shape {
+        dim {
+          size: -1
+        }
+        dim {
+          size: 256
+        }
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn_1/range_1"
+  op: "Range"
+  input: "generator/rnn_1/range_1/start"
+  input: "generator/rnn_1/Rank_1"
+  input: "generator/rnn_1/range_1/delta"
+}
+node {
+  name: "generator/rnn_1/concat_2"
+  op: "ConcatV2"
+  input: "generator/rnn_1/concat_2/values_0"
+  input: "generator/rnn_1/range_1"
+  input: "generator/rnn_1/concat_2/axis"
+}
+node {
+  name: "generator/rnn_1/transpose_1"
+  op: "Transpose"
+  input: "generator/rnn_1/TensorArrayStack/TensorArrayGatherV3"
+  input: "generator/rnn_1/concat_2"
+}
+node {
+  name: "generator/sub_1"
+  op: "Sub"
+  input: "generator/sub"
+  input: "generator/rnn_1/transpose_1"
+}
+node {
+  name: "generator/rnn_2/range"
+  op: "Range"
+  input: "generator/rnn_2/range/start"
+  input: "generator/rnn_2/Rank"
+  input: "generator/rnn_2/range/delta"
+}
+node {
+  name: "generator/rnn_2/concat"
+  op: "ConcatV2"
+  input: "generator/rnn_2/concat/values_0"
+  input: "generator/rnn_2/range"
+  input: "generator/rnn_2/concat/axis"
+}
+node {
+  name: "generator/rnn_2/transpose"
+  op: "Transpose"
+  input: "generator/sub_1"
+  input: "generator/rnn_2/concat"
+}
+node {
+  name: "generator/rnn_2/Shape_1"
+  op: "Shape"
+  input: "generator/rnn_2/transpose"
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/strided_slice_1"
+  op: "StridedSlice"
+  input: "generator/rnn_2/Shape_1"
+  input: "generator/rnn_2/strided_slice_1/stack"
+  input: "generator/rnn_2/strided_slice_1/stack_1"
+  input: "generator/rnn_2/strided_slice_1/stack_2"
+  attr {
+    key: "begin_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "ellipsis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "end_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "new_axis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "shrink_axis_mask"
+    value {
+      i: 1
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/TensorArray"
+  op: "TensorArrayV3"
+  input: "generator/rnn_2/strided_slice_1"
+  attr {
+    key: "clear_after_read"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "dynamic_size"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "element_shape"
+    value {
+      shape {
+        dim {
+          size: -1
+        }
+        dim {
+          size: 256
+        }
+      }
+    }
+  }
+  attr {
+    key: "identical_element_shapes"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "tensor_array_name"
+    value {
+      s: "generator/rnn_2/dynamic_rnn/output_0"
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/TensorArray_1"
+  op: "TensorArrayV3"
+  input: "generator/rnn_2/strided_slice_1"
+  attr {
+    key: "clear_after_read"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "dynamic_size"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "element_shape"
+    value {
+      shape {
+        dim {
+          size: -1
+        }
+        dim {
+          size: 256
+        }
+      }
+    }
+  }
+  attr {
+    key: "identical_element_shapes"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "tensor_array_name"
+    value {
+      s: "generator/rnn_2/dynamic_rnn/input_0"
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/TensorArrayUnstack/Shape"
+  op: "Shape"
+  input: "generator/rnn_2/transpose"
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/TensorArrayUnstack/strided_slice"
+  op: "StridedSlice"
+  input: "generator/rnn_2/TensorArrayUnstack/Shape"
+  input: "generator/rnn_2/TensorArrayUnstack/strided_slice/stack"
+  input: "generator/rnn_2/TensorArrayUnstack/strided_slice/stack_1"
+  input: "generator/rnn_2/TensorArrayUnstack/strided_slice/stack_2"
+  attr {
+    key: "begin_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "ellipsis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "end_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "new_axis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "shrink_axis_mask"
+    value {
+      i: 1
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/TensorArrayUnstack/range"
+  op: "Range"
+  input: "generator/rnn_2/TensorArrayUnstack/range/start"
+  input: "generator/rnn_2/TensorArrayUnstack/strided_slice"
+  input: "generator/rnn_2/TensorArrayUnstack/range/delta"
+}
+node {
+  name: "generator/rnn_2/TensorArrayUnstack/TensorArrayScatter/TensorArrayScatterV3"
+  op: "TensorArrayScatterV3"
+  input: "generator/rnn_2/TensorArray_1"
+  input: "generator/rnn_2/TensorArrayUnstack/range"
+  input: "generator/rnn_2/transpose"
+  input: "generator/rnn_2/TensorArray_1:1"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn_2/transpose"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/Maximum"
+  op: "Maximum"
+  input: "generator/rnn_2/Maximum/x"
+  input: "generator/rnn_2/strided_slice_1"
+}
+node {
+  name: "generator/rnn_2/Minimum"
+  op: "Minimum"
+  input: "generator/rnn_2/strided_slice_1"
+  input: "generator/rnn_2/Maximum"
+}
+node {
+  name: "generator/rnn_2/while/Enter"
+  op: "Enter"
+  input: "generator/rnn_2/while/iteration_counter"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_2/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/Enter_1"
+  op: "Enter"
+  input: "generator/rnn_2/time"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_2/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/Enter_2"
+  op: "Enter"
+  input: "generator/rnn_2/TensorArray:1"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_2/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/Enter_3"
+  op: "Enter"
+  input: "generator/strided_slice_5"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_2/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/Enter_4"
+  op: "Enter"
+  input: "generator/strided_slice_6"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_2/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/Merge"
+  op: "Merge"
+  input: "generator/rnn_2/while/Enter"
+  input: "generator/rnn_2/while/NextIteration"
+}
+node {
+  name: "generator/rnn_2/while/Merge_1"
+  op: "Merge"
+  input: "generator/rnn_2/while/Enter_1"
+  input: "generator/rnn_2/while/NextIteration_1"
+}
+node {
+  name: "generator/rnn_2/while/Merge_2"
+  op: "Merge"
+  input: "generator/rnn_2/while/Enter_2"
+  input: "generator/rnn_2/while/NextIteration_2"
+}
+node {
+  name: "generator/rnn_2/while/Merge_3"
+  op: "Merge"
+  input: "generator/rnn_2/while/Enter_3"
+  input: "generator/rnn_2/while/NextIteration_3"
+}
+node {
+  name: "generator/rnn_2/while/Merge_4"
+  op: "Merge"
+  input: "generator/rnn_2/while/Enter_4"
+  input: "generator/rnn_2/while/NextIteration_4"
+}
+node {
+  name: "generator/rnn_2/while/Less/Enter"
+  op: "Enter"
+  input: "generator/rnn_2/strided_slice_1"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_2/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/Less"
+  op: "Less"
+  input: "generator/rnn_2/while/Merge"
+  input: "generator/rnn_2/while/Less/Enter"
+}
+node {
+  name: "generator/rnn_2/while/Less_1/Enter"
+  op: "Enter"
+  input: "generator/rnn_2/Minimum"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_2/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/Less_1"
+  op: "Less"
+  input: "generator/rnn_2/while/Merge_1"
+  input: "generator/rnn_2/while/Less_1/Enter"
+}
+node {
+  name: "generator/rnn_2/while/LogicalAnd"
+  op: "LogicalAnd"
+  input: "generator/rnn_2/while/Less"
+  input: "generator/rnn_2/while/Less_1"
+}
+node {
+  name: "generator/rnn_2/while/LoopCond"
+  op: "LoopCond"
+  input: "generator/rnn_2/while/LogicalAnd"
+}
+node {
+  name: "generator/rnn_2/while/Switch"
+  op: "Switch"
+  input: "generator/rnn_2/while/Merge"
+  input: "generator/rnn_2/while/LoopCond"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn_2/while/Merge"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/Switch_1"
+  op: "Switch"
+  input: "generator/rnn_2/while/Merge_1"
+  input: "generator/rnn_2/while/LoopCond"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn_2/while/Merge_1"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/Switch_2"
+  op: "Switch"
+  input: "generator/rnn_2/while/Merge_2"
+  input: "generator/rnn_2/while/LoopCond"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn_2/while/Merge_2"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/Switch_3"
+  op: "Switch"
+  input: "generator/rnn_2/while/Merge_3"
+  input: "generator/rnn_2/while/LoopCond"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn_2/while/Merge_3"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/Switch_4"
+  op: "Switch"
+  input: "generator/rnn_2/while/Merge_4"
+  input: "generator/rnn_2/while/LoopCond"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn_2/while/Merge_4"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/Identity"
+  op: "Identity"
+  input: "generator/rnn_2/while/Switch:1"
+}
+node {
+  name: "generator/rnn_2/while/Identity_1"
+  op: "Identity"
+  input: "generator/rnn_2/while/Switch_1:1"
+}
+node {
+  name: "generator/rnn_2/while/Identity_2"
+  op: "Identity"
+  input: "generator/rnn_2/while/Switch_2:1"
+}
+node {
+  name: "generator/rnn_2/while/Identity_3"
+  op: "Identity"
+  input: "generator/rnn_2/while/Switch_3:1"
+}
+node {
+  name: "generator/rnn_2/while/Identity_4"
+  op: "Identity"
+  input: "generator/rnn_2/while/Switch_4:1"
+}
+node {
+  name: "generator/rnn_2/while/add"
+  op: "Add"
+  input: "generator/rnn_2/while/Identity"
+  input: "generator/rnn_2/while/add/y"
+}
+node {
+  name: "generator/rnn_2/while/TensorArrayReadV3/Enter"
+  op: "Enter"
+  input: "generator/rnn_2/TensorArray_1"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_2/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/TensorArrayReadV3/Enter_1"
+  op: "Enter"
+  input: "generator/rnn_2/TensorArrayUnstack/TensorArrayScatter/TensorArrayScatterV3"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_2/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/TensorArrayReadV3"
+  op: "TensorArrayReadV3"
+  input: "generator/rnn_2/while/TensorArrayReadV3/Enter"
+  input: "generator/rnn_2/while/Identity_1"
+  input: "generator/rnn_2/while/TensorArrayReadV3/Enter_1"
+  attr {
+    key: "dtype"
+    value {
+      type: DT_FLOAT
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/sub/Enter"
+  op: "Enter"
+  input: "generator/strided_slice"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_2/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/sub"
+  op: "Sub"
+  input: "generator/rnn_2/while/sub/x"
+  input: "generator/rnn_2/while/sub/Enter"
+}
+node {
+  name: "generator/rnn_2/while/dropout/Shape"
+  op: "Shape"
+  input: "generator/rnn_2/while/TensorArrayReadV3"
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/dropout/random_uniform/RandomUniform"
+  op: "RandomUniform"
+  input: "generator/rnn_2/while/dropout/Shape"
+  attr {
+    key: "dtype"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "seed"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "seed2"
+    value {
+      i: 0
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/dropout/random_uniform/sub"
+  op: "Sub"
+  input: "generator/rnn_2/while/dropout/random_uniform/max"
+  input: "generator/rnn_2/while/dropout/random_uniform/min"
+}
+node {
+  name: "generator/rnn_2/while/dropout/random_uniform/mul"
+  op: "Mul"
+  input: "generator/rnn_2/while/dropout/random_uniform/RandomUniform"
+  input: "generator/rnn_2/while/dropout/random_uniform/sub"
+}
+node {
+  name: "generator/rnn_2/while/dropout/random_uniform"
+  op: "Add"
+  input: "generator/rnn_2/while/dropout/random_uniform/mul"
+  input: "generator/rnn_2/while/dropout/random_uniform/min"
+}
+node {
+  name: "generator/rnn_2/while/dropout/sub"
+  op: "Sub"
+  input: "generator/rnn_2/while/dropout/sub/x"
+  input: "generator/rnn_2/while/sub"
+}
+node {
+  name: "generator/rnn_2/while/dropout/truediv"
+  op: "RealDiv"
+  input: "generator/rnn_2/while/dropout/truediv/x"
+  input: "generator/rnn_2/while/dropout/sub"
+}
+node {
+  name: "generator/rnn_2/while/dropout/GreaterEqual"
+  op: "GreaterEqual"
+  input: "generator/rnn_2/while/dropout/random_uniform"
+  input: "generator/rnn_2/while/sub"
+}
+node {
+  name: "generator/rnn_2/while/dropout/mul"
+  op: "Mul"
+  input: "generator/rnn_2/while/TensorArrayReadV3"
+  input: "generator/rnn_2/while/dropout/truediv"
+}
+node {
+  name: "generator/rnn_2/while/dropout/Cast"
+  op: "Cast"
+  input: "generator/rnn_2/while/dropout/GreaterEqual"
+  attr {
+    key: "DstT"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "SrcT"
+    value {
+      type: DT_BOOL
+    }
+  }
+  attr {
+    key: "Truncate"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/dropout/mul_1"
+  op: "Mul"
+  input: "generator/rnn_2/while/dropout/mul"
+  input: "generator/rnn_2/while/dropout/Cast"
+}
+node {
+  name: "generator/rnn/lstm_cell_layer_2_channel_0/kernel/read"
+  op: "Identity"
+  input: "generator/rnn/lstm_cell_layer_2_channel_0/kernel"
+}
+node {
+  name: "generator/rnn/lstm_cell_layer_2_channel_0/bias/read"
+  op: "Identity"
+  input: "generator/rnn/lstm_cell_layer_2_channel_0/bias"
+}
+node {
+  name: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/concat"
+  op: "ConcatV2"
+  input: "generator/rnn_2/while/dropout/mul_1"
+  input: "generator/rnn_2/while/Identity_4"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/concat/axis"
+}
+node {
+  name: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/MatMul/Enter"
+  op: "Enter"
+  input: "generator/rnn/lstm_cell_layer_2_channel_0/kernel/read"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_2/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/MatMul"
+  op: "MatMul"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/concat"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/MatMul/Enter"
+  attr {
+    key: "transpose_a"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "transpose_b"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/BiasAdd/Enter"
+  op: "Enter"
+  input: "generator/rnn/lstm_cell_layer_2_channel_0/bias/read"
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_2/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/BiasAdd"
+  op: "BiasAdd"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/MatMul"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/BiasAdd/Enter"
+}
+node {
+  name: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/split"
+  op: "Split"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/split/split_dim"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/BiasAdd"
+  attr {
+    key: "num_split"
+    value {
+      i: 4
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/add"
+  op: "Add"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/split:2"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/add/y"
+}
+node {
+  name: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/Sigmoid"
+  op: "Sigmoid"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/add"
+}
+node {
+  name: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/mul"
+  op: "Mul"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/Sigmoid"
+  input: "generator/rnn_2/while/Identity_3"
+}
+node {
+  name: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/Sigmoid_1"
+  op: "Sigmoid"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/split"
+}
+node {
+  name: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/Tanh"
+  op: "Tanh"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/split:1"
+}
+node {
+  name: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/mul_1"
+  op: "Mul"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/Sigmoid_1"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/Tanh"
+}
+node {
+  name: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/add_1"
+  op: "Add"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/mul"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/mul_1"
+}
+node {
+  name: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/Sigmoid_2"
+  op: "Sigmoid"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/split:3"
+}
+node {
+  name: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/Tanh_1"
+  op: "Tanh"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/add_1"
+}
+node {
+  name: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/mul_2"
+  op: "Mul"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/Sigmoid_2"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/Tanh_1"
+}
+node {
+  name: "generator/rnn_2/while/TensorArrayWrite/TensorArrayWriteV3/Enter"
+  op: "Enter"
+  input: "generator/rnn_2/TensorArray"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn_2/while/lstm_cell_layer_2_channel_0/mul_2"
+      }
+    }
+  }
+  attr {
+    key: "frame_name"
+    value {
+      s: "generator/rnn_2/while/while_context"
+    }
+  }
+  attr {
+    key: "is_constant"
+    value {
+      b: true
+    }
+  }
+  attr {
+    key: "parallel_iterations"
+    value {
+      i: 32
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/TensorArrayWrite/TensorArrayWriteV3"
+  op: "TensorArrayWriteV3"
+  input: "generator/rnn_2/while/TensorArrayWrite/TensorArrayWriteV3/Enter"
+  input: "generator/rnn_2/while/Identity_1"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/mul_2"
+  input: "generator/rnn_2/while/Identity_2"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn_2/while/lstm_cell_layer_2_channel_0/mul_2"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/while/add_1"
+  op: "Add"
+  input: "generator/rnn_2/while/Identity_1"
+  input: "generator/rnn_2/while/add_1/y"
+}
+node {
+  name: "generator/rnn_2/while/NextIteration"
+  op: "NextIteration"
+  input: "generator/rnn_2/while/add"
+}
+node {
+  name: "generator/rnn_2/while/NextIteration_1"
+  op: "NextIteration"
+  input: "generator/rnn_2/while/add_1"
+}
+node {
+  name: "generator/rnn_2/while/NextIteration_2"
+  op: "NextIteration"
+  input: "generator/rnn_2/while/TensorArrayWrite/TensorArrayWriteV3"
+}
+node {
+  name: "generator/rnn_2/while/NextIteration_3"
+  op: "NextIteration"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/add_1"
+}
+node {
+  name: "generator/rnn_2/while/NextIteration_4"
+  op: "NextIteration"
+  input: "generator/rnn_2/while/lstm_cell_layer_2_channel_0/mul_2"
+}
+node {
+  name: "generator/rnn_2/while/Exit_2"
+  op: "Exit"
+  input: "generator/rnn_2/while/Switch_2"
+}
+node {
+  name: "generator/rnn_2/while/Exit_3"
+  op: "Exit"
+  input: "generator/rnn_2/while/Switch_3"
+}
+node {
+  name: "generator/rnn_2/while/Exit_4"
+  op: "Exit"
+  input: "generator/rnn_2/while/Switch_4"
+}
+node {
+  name: "generator/rnn_2/TensorArrayStack/TensorArraySizeV3"
+  op: "TensorArraySizeV3"
+  input: "generator/rnn_2/TensorArray"
+  input: "generator/rnn_2/while/Exit_2"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn_2/TensorArray"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/TensorArrayStack/range"
+  op: "Range"
+  input: "generator/rnn_2/TensorArrayStack/range/start"
+  input: "generator/rnn_2/TensorArrayStack/TensorArraySizeV3"
+  input: "generator/rnn_2/TensorArrayStack/range/delta"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn_2/TensorArray"
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/TensorArrayStack/TensorArrayGatherV3"
+  op: "TensorArrayGatherV3"
+  input: "generator/rnn_2/TensorArray"
+  input: "generator/rnn_2/TensorArrayStack/range"
+  input: "generator/rnn_2/while/Exit_2"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/rnn_2/TensorArray"
+      }
+    }
+  }
+  attr {
+    key: "dtype"
+    value {
+      type: DT_FLOAT
+    }
+  }
+  attr {
+    key: "element_shape"
+    value {
+      shape {
+        dim {
+          size: -1
+        }
+        dim {
+          size: 256
+        }
+      }
+    }
+  }
+}
+node {
+  name: "generator/rnn_2/range_1"
+  op: "Range"
+  input: "generator/rnn_2/range_1/start"
+  input: "generator/rnn_2/Rank_1"
+  input: "generator/rnn_2/range_1/delta"
+}
+node {
+  name: "generator/rnn_2/concat_2"
+  op: "ConcatV2"
+  input: "generator/rnn_2/concat_2/values_0"
+  input: "generator/rnn_2/range_1"
+  input: "generator/rnn_2/concat_2/axis"
+}
+node {
+  name: "generator/rnn_2/transpose_1"
+  op: "Transpose"
+  input: "generator/rnn_2/TensorArrayStack/TensorArrayGatherV3"
+  input: "generator/rnn_2/concat_2"
+}
+node {
+  name: "generator/sub_2"
+  op: "Sub"
+  input: "generator/sub_1"
+  input: "generator/rnn_2/transpose_1"
+}
+node {
+  name: "generator/concat"
+  op: "Identity"
+  input: "generator/sub_2"
+}
+node {
+  name: "generator/states_out/0/0"
+  op: "Pack"
+  input: "generator/rnn/while/Exit_3"
+  input: "generator/rnn/while/Exit_4"
+  attr {
+    key: "axis"
+    value {
+      i: 0
+    }
+  }
+}
+node {
+  name: "generator/states_out/0/1"
+  op: "Pack"
+  input: "generator/rnn_1/while/Exit_3"
+  input: "generator/rnn_1/while/Exit_4"
+  attr {
+    key: "axis"
+    value {
+      i: 0
+    }
+  }
+}
+node {
+  name: "generator/states_out/0/2"
+  op: "Pack"
+  input: "generator/rnn_2/while/Exit_3"
+  input: "generator/rnn_2/while/Exit_4"
+  attr {
+    key: "axis"
+    value {
+      i: 0
+    }
+  }
+}
+node {
+  name: "generator/states_out/0"
+  op: "Pack"
+  input: "generator/states_out/0/0"
+  input: "generator/states_out/0/1"
+  input: "generator/states_out/0/2"
+  attr {
+    key: "axis"
+    value {
+      i: 0
+    }
+  }
+}
+node {
+  name: "generator/states_out"
+  op: "Pack"
+  input: "generator/states_out/0"
+  attr {
+    key: "axis"
+    value {
+      i: 0
+    }
+  }
+}
+node {
+  name: "generator/pre_outputs"
+  op: "Identity"
+  input: "generator/concat"
+}
+node {
+  name: "generator/final_fc/weights_final_fc/read"
+  op: "Identity"
+  input: "generator/final_fc/weights_final_fc"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/final_fc/weights_final_fc"
+      }
+    }
+  }
+}
+node {
+  name: "generator/final_fc/biases_final_fc/read"
+  op: "Identity"
+  input: "generator/final_fc/biases_final_fc"
+  attr {
+    key: "_class"
+    value {
+      list {
+        s: "loc:@generator/final_fc/biases_final_fc"
+      }
+    }
+  }
+}
+node {
+  name: "generator/final_fc/Reshape"
+  op: "Reshape"
+  input: "generator/pre_outputs"
+  input: "generator/final_fc/Reshape/shape"
+}
+node {
+  name: "generator/final_fc/MatMul"
+  op: "MatMul"
+  input: "generator/final_fc/Reshape"
+  input: "generator/final_fc/weights_final_fc/read"
+  attr {
+    key: "transpose_a"
+    value {
+      b: false
+    }
+  }
+  attr {
+    key: "transpose_b"
+    value {
+      b: false
+    }
+  }
+}
+node {
+  name: "generator/final_fc/Add"
+  op: "Add"
+  input: "generator/final_fc/MatMul"
+  input: "generator/final_fc/biases_final_fc/read"
+}
+node {
+  name: "generator/Shape"
+  op: "Shape"
+  input: "generator/prep_input_tensor"
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "generator/strided_slice_7"
+  op: "StridedSlice"
+  input: "generator/Shape"
+  input: "generator/strided_slice_7/stack"
+  input: "generator/strided_slice_7/stack_1"
+  input: "generator/strided_slice_7/stack_2"
+  attr {
+    key: "begin_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "ellipsis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "end_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "new_axis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "shrink_axis_mask"
+    value {
+      i: 1
+    }
+  }
+}
+node {
+  name: "generator/Shape_1"
+  op: "Shape"
+  input: "generator/prep_input_tensor"
+  attr {
+    key: "out_type"
+    value {
+      type: DT_INT32
+    }
+  }
+}
+node {
+  name: "generator/strided_slice_8"
+  op: "StridedSlice"
+  input: "generator/Shape_1"
+  input: "generator/strided_slice_8/stack"
+  input: "generator/strided_slice_8/stack_1"
+  input: "generator/strided_slice_8/stack_2"
+  attr {
+    key: "begin_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "ellipsis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "end_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "new_axis_mask"
+    value {
+      i: 0
+    }
+  }
+  attr {
+    key: "shrink_axis_mask"
+    value {
+      i: 1
+    }
+  }
+}
+node {
+  name: "generator/Reshape/shape"
+  op: "Pack"
+  input: "generator/strided_slice_7"
+  input: "generator/strided_slice_8"
+  input: "generator/Reshape/shape/2"
+  attr {
+    key: "axis"
+    value {
+      i: 0
+    }
+  }
+}
+node {
+  name: "generator/Reshape"
+  op: "Reshape"
+  input: "generator/final_fc/Add"
+  input: "generator/Reshape/shape"
+}
+node {
+  name: "generator/Relu"
+  op: "Relu"
+  input: "generator/Reshape"
+}
+node {
+  name: "generator/Neg"
+  op: "Neg"
+  input: "generator/Relu"
+}
+node {
+  name: "generator/sub_3"
+  op: "Sub"
+  input: "generator/Neg"
+  input: "generator/sub_3/y"
+}
+node {
+  name: "generator/Add_1"
+  op: "Add"
+  input: "generator/add"
+  input: "generator/sub_3"
+}
+node {
+  name: "generator/truediv"
+  op: "RealDiv"
+  input: "generator/Add_1"
+  input: "generator/truediv/y"
+}
+node {
+  name: "generator/outputs"
+  op: "Maximum"
+  input: "generator/outputs/x"
+  input: "generator/truediv"
+}
+library {
+}
+versions {
+}

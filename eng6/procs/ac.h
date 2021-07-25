@@ -51,5 +51,8 @@ namespace sel {
 	} // eng
 } //sel
 #if defined(COMPILE_UNIT_TESTS)
-#include "ac_ut.h"
+#include "../unit_test.h"
+
+SEL_UNIT_TEST(ac)
+SEL_UNIT_TEST_END
 #endif

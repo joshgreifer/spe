@@ -23,7 +23,7 @@ namespace sel {
 		const char *key_for(const ITEM_T& val) {
 			for (auto& kv : *this)
 				if (kv.second == val)
-					return kv.first;
+					return kv.first.c_str();
 			return nullptr;
 
 

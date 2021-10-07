@@ -443,8 +443,8 @@ private:
 		vector<double> coefficients;
 		firls(length - 1, firlsFreqsV, firlsAmplitudeV, coefficients);
 		vector<double> window;
-		kaiser(length, bta, window);
-		// hamming(length, window);
+		//kaiser(length, bta, window);
+		hamming(length, window);
 		const int coefficientsSize = (int)coefficients.size();
 		for (int i = 0; i < coefficientsSize; i++)
 			coefficients[i] *= upFactor * window[i];

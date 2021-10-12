@@ -91,7 +91,7 @@ static bool file_exists(const char *filename)
 
 void run()
 {
-	const std::string onnx_filename = "./test.onnx";
+	const std::string onnx_filename = "./hearable.onnx";
 
 	auto onnx_file_found = file_exists(onnx_filename.c_str());
 	SEL_UNIT_TEST_ASSERT(onnx_file_found);
@@ -145,5 +145,61 @@ void run()
 //    }
 
 }
+void run_old()
+        {
+            const std::string onnx_filename = "./test.onnx";
+
+            auto onnx_file_found = file_exists(onnx_filename.c_str());
+            SEL_UNIT_TEST_ASSERT(onnx_file_found);
+            if (onnx_file_found) {
+                cv::dnn::Net net(cv::dnn::readNetFromONNX(onnx_filename));
+                std::cout << "[\n";
+                for (auto& layer_name : net.getLayerNames())
+                    std::cout << '\t' << layer_name << '\n';
+                std::cout << "]\n";
+
+
+                sel::eng6::proc::dnn<ut_traits::num_input_features, ut_traits::num_output_features> dnn(onnx_filename);
+
+                sel::eng6::Const input = input_a;
+                dnn.ConnectFrom(input);
+                dnn.freeze();
+
+                dnn.process();
+                const samp_t* matlab_result = matlab_results.data();
+                for (auto& v : dnn.oport)
+                {
+                    SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(v, *matlab_result++)
+                }
+            }
+
+//    const std::string pb_filename = "./model-990.pb";
+//    const std::string pbtxt_filename = "./model-990.pbtxt";
+//
+//    auto pb_file_found = file_exists(pb_filename.c_str());
+//    auto pbtxt_file_found = file_exists(pbtxt_filename.c_str());
+//    SEL_UNIT_TEST_ASSERT(pb_file_found);
+//    SEL_UNIT_TEST_ASSERT(pbtxt_file_found);
+//    cv::dnn::Net net(cv::dnn::readNetFromTensorflow(pb_filename, pbtxt_filename ));
+//    std::cout << "[\n";
+//    for (auto& layer_name : net.getLayerNames())
+//        std::cout << '\t' << layer_name << '\n';
+//    std::cout << "]\n";
+//
+//
+//    sel::eng6::proc::dnn<ut_traits::num_input_features, ut_traits::num_output_features> dnn(onnx_filename);
+//
+//    sel::eng6::Const input = input_a;
+//    dnn.ConnectFrom(input);
+//    dnn.freeze();
+
+//    dnn.process();
+//    const samp_t* matlab_result = matlab_results.data();
+//    for (auto& v : dnn.oport)
+//    {
+//        SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(v, *matlab_result++)
+//    }
+
+        }
 SEL_UNIT_TEST_END
 #endif

@@ -37,7 +37,7 @@ namespace sel {
 
 	template<class N>N constexpr pow10( N n)
 	{
-		return n == 0 ? 1 : pow10(n - 1);
+		return n == 0 ? 1 : 10 * pow10(n - 1);
 	}
 	
 	/* -----------------------------------------------------------------------------------------------
@@ -298,3 +298,17 @@ namespace sel {
 
 	//#pragma message( "( included " __FILE__ ")" )
 } // sel
+
+#if defined(COMPILE_UNIT_TESTS)
+#include "unit_test.h"
+
+SEL_UNIT_TEST(ratio)
+
+void run() {
+    SEL_UNIT_TEST_ITEM("gcd");
+    constexpr unsigned long long mersenne_prime1 = 2305843009213693951;
+    for (size_t n = 2; n < 100000; ++n)
+        SEL_UNIT_TEST_ASSERT(sel::gcd(mersenne_prime1, n) == 1);
+}
+SEL_UNIT_TEST_END
+#endif

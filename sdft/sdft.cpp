@@ -19,6 +19,7 @@ namespace fftw {
 #include <fftw3.h>
 }
 
+#include "../eng6/idx.h"
 fftw::fftw_plan plan_fwd;
 fftw::fftw_plan plan_inv;
 
@@ -27,7 +28,7 @@ fftw::fftw_plan plan_inv;
 typedef std::complex<double> complex;
 
 // Buffer size, make it a power of two if you want to improve fftw
-const int N = 512;
+constexpr int N = 8192;
 
 
 // input signal
@@ -49,23 +50,22 @@ complex icoeffs[N];
 complex slow_coeffs[N][N];
 
 // global index for input and output signals
-int idx;
-static_assert(sizeof(complex)==2 * sizeof(double));
+sel::idx<N> idx;
 
 // these are just there to optimize (get rid of index lookups in sdft)
 complex oldest_data, newest_data;
 
-//initilaize e-to-the-i-thetas for theta = 0..2PI in increments of 1/N
+//initialize e-to-the-i-thetas for theta = 0..2PI in increments of 1/N
 void init_coeffs()
 {
     for (int i = 0; i < N; ++i) {
-        double a = -2.0 * M_PI * i  / double(N);
-        coeffs[i] = complex(cos(a)/* / N */, sin(a) /* / N */);
+        const double a = -2.0 * M_PI * i  / double(N);
+        const auto c = cos(a);
+        const auto s = sin(a);
+        coeffs[i] = complex(c, s);
+        icoeffs[i] = complex(c,-s);
     }
-    for (int i = 0; i < N; ++i) {
-        double a = 2.0 * M_PI * i  / double(N);
-        icoeffs[i] = complex(cos(a),sin(a));
-    }
+
 
     for (int i = 0; i < N; ++i) {
         for (int j = 0; j < N; ++j) {
@@ -86,14 +86,14 @@ void init()
     srand(857);
     init_coeffs();
     oldest_data = newest_data = 0.0;
-    idx = 0;
+    idx.reset();
 }
 
 // simulating adding data to circular buffer
 void add_data()
 {
     oldest_data = in[idx];
-    newest_data = in[idx] = complex(rand());
+    newest_data = in[idx] = complex(rand()/(double)RAND_MAX);
 
 }
 
@@ -101,12 +101,11 @@ void add_data()
 // sliding dft
 void sdft()
 {
-    complex delta = newest_data - oldest_data;
-    int ci = 0;
+    const complex delta = newest_data - oldest_data;
+    sel::idx<N> ci;
     for (int i = 0; i < N; ++i) {
         freqs[i] += delta * coeffs[ci];
-        if ((ci += idx) >= N)
-            ci -= N;
+        ci += idx;
     }
 }
 
@@ -114,11 +113,10 @@ void sdft()
 void isdft()
 {
     complex delta = newest_data - oldest_data;
-    int ci = 0;
+    sel::idx<N> ci;
     for (int i = 0; i < N; ++i) {
         freqs[i] += delta * icoeffs[ci];
-        if ((ci += idx) >= N)
-            ci -= N;
+        ci += idx;
     }
 }
 
@@ -148,7 +146,7 @@ void powr_spectrum(double *powr)
 
 int main(int argc, char *argv[])
 {
-    const int NSAMPS = N*10;
+    const int NSAMPS = N;
     clock_t start, finish;
 
 #if defined(DO_SDFT)
@@ -165,7 +163,7 @@ int main(int argc, char *argv[])
         // Mess about with freqs[] here
         //isdft();
 
-        if (++idx == N) idx = 0; // bump global index
+        ++idx; // bump global index
 
         if ((i % 1000) == 0)
             std::cerr << i << " iters..." << '\r';
@@ -195,7 +193,7 @@ int main(int argc, char *argv[])
         // mess about with freqs here
         //fftw::fftw_execute(plan_inv);
 
-        if (++idx == N) idx = 0; // bump global index
+        ++idx; // bump global index
 
         if ((i % 1000) == 0)
             std::cerr << i << " iters..." << '\r';
@@ -215,7 +213,7 @@ int main(int argc, char *argv[])
 #endif
 #if defined(DO_SDFT) && defined(DO_FFTW)
 // ------------------------------      ---------------------------------------------
-    const double MAX_PERMISSIBLE_DIFF = 1e-10; // DBL_EPSILON;
+    const double MAX_PERMISSIBLE_DIFF = 1e-12; // DBL_EPSILON;
     double diff;
     // check my ft gives same power spectrum as FFTW
     for (int i = 0; i < N/2; ++i)

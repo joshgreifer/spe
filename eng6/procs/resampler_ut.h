@@ -17,12 +17,12 @@ struct ut_traits
 	static constexpr size_t output_fs = 16000;
 	static constexpr size_t input_frame_size = 256;
 	static constexpr size_t output_frame_size = 256;
-	static constexpr size_t seconds_to_run = 15;
+	static constexpr size_t seconds_to_run = 1;
 	static constexpr size_t iters_to_run = static_cast<size_t>(seconds_to_run * input_fs / static_cast<double>(input_frame_size));
 
 };
 using resampler = sel::eng6::proc::resampler <ut_traits,
-	ut_traits::output_fs, 
+	ut_traits::output_fs,
 	ut_traits::input_frame_size,
 	ut_traits::output_frame_size>;
 
@@ -35,7 +35,7 @@ struct sig_gen_ramp : sel::eng6::Processor01A<ut_traits::input_frame_size>
 	sel::eng6::scheduler& scheduler;
 
 	sig_gen_ramp(sel::eng6::scheduler& scheduler) : scheduler(scheduler) {}
-	
+
 	void process() final
 	{
 		if (iters_remaining-- == 0)
@@ -48,7 +48,7 @@ struct sig_gen_ramp : sel::eng6::Processor01A<ut_traits::input_frame_size>
 struct resampler_output_check_sink : sel::eng6::Processor1A0<ut_traits::output_frame_size>
 {
 	size_t c = 0;
-	
+
 	void process() final
 	{
 		c += ut_traits::output_frame_size;
@@ -101,7 +101,7 @@ void run_old() {
 	printf("\nInput rate\tClaimed: %4.4f\tActual: %4.4f\n", static_cast<double>(input_schedule.expected_rate()), input_rate_actual);
 	printf("Output rate\tClaimed: %4.4f\tActual: %4.4f\n", static_cast<double>(output_schedule.expected_rate()), output_rate_actual * correction);
 
-	// Resampler output after 
+	// Resampler output after
 	const samp_t *results = logger.in_as_array(0);
 }
 SEL_UNIT_TEST_END

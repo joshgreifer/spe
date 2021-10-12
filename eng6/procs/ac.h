@@ -54,5 +54,6 @@ namespace sel {
 #include "../unit_test.h"
 
 SEL_UNIT_TEST(ac)
+void run() {}
 SEL_UNIT_TEST_END
 #endif

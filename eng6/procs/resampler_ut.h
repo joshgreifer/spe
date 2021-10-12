@@ -55,8 +55,13 @@ struct resampler_output_check_sink : sel::eng6::Processor1A0<ut_traits::output_f
 	}
 };
 
-
 void run() {
+    std::vector<double> f = {0, 0.25, 0.3, 1};
+    std::vector<double> a = {1, 1, 0, 0};
+    std:vector<double> o;
+    resample_impl::resampler_impl::firls(255, f, a, o);
+}
+void run_old() {
 
 
 	sel::eng6::scheduler s = {};

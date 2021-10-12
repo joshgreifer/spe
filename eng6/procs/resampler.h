@@ -20,7 +20,7 @@ namespace sel {
 
 				struct resampler_in_proc_t : Processor1A0<InW>
 				{
-					std::unique_ptr<resampler_impl> pimpl_ = 0;
+					std::unique_ptr<resample_impl::resampler_impl> pimpl_ = 0;
 					resampler *owner;
 
 					explicit resampler_in_proc_t(resampler *m) : owner(m) {}
@@ -36,7 +36,7 @@ namespace sel {
 
 						size_t fifo_size;
 						if (input_fs != OutputFs) {
-							pimpl_ = std::move(std::make_unique<resampler_impl>(InW, input_fs, OutputFs));
+							pimpl_ = std::move(std::make_unique<resample_impl::resampler_impl>(InW, input_fs, OutputFs));
 							//fifo_size = 2 * sel::lcm(InW, OutW);
 
 							fifo_size = 2 * pimpl_->output_frame_size();

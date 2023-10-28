@@ -99,7 +99,7 @@ void SEL_UNIT_TEST_ITEM(const char* msg) {
 	}
 
 #define SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(EXPR1, EXPR2) SEL_UNIT_TEST_EQUAL_THRESH(EXPR1, EXPR2, 1e-7)
-
+#define SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL_ARRAYS(EXPR1, EXPR2) { for (size_t i=0; i < (EXPR1).size(); ++i) SEL_UNIT_TEST_EQUAL_THRESH((double)EXPR1[i], (double)EXPR2[i], 1e-7); }
 #else
 	#define SEL_RUN_UNIT_TEST ((void *()) 0)
 	#define SEL_UNIT_TEST  ((void *()) 0)

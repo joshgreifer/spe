@@ -5,7 +5,8 @@
 //   positive integers.
 
 //This function is translated from Matlab's Resample funtion. 
-
+// Python Implemntation: https://github.com/scipy/scipy/blob/v1.7.1/scipy/signal/_upfirdn.py#L107-L215
+// C++ Implementation: https://gitlab-dynamap.timone.univ-amu.fr/anywave/anywave/-/blob/de00138115fa3aae591dc230c5d0edf8726dcfd4/sigpack/resampling/resampling.h
 //Author: Haoqi Bai
 
 // Usage: resampler_impl::resample(2048, 100, input, output);

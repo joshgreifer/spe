@@ -33,13 +33,13 @@ namespace sel
 				// default constructor needed for factory creation
 				explicit dnn() = default;
 
-				explicit dnn(const std::string& onnx_filename, const char*output_layer_name = "softmax") :
+				explicit dnn(const std::string& onnx_filename, const char*output_layer_name = "") :
 				trained_net_(cv::dnn::readNetFromONNX(onnx_filename)),
 				output_layer_name_(output_layer_name)
 				{
 				}
 
-				explicit dnn(params& args) : dnn( args.get<std::string>("filename"), args.get<const char*>("output_layer", "softmax"))
+				explicit dnn(params& args) : dnn( args.get<std::string>("filename"), args.get<const char*>("output_layer", ""))
 				{
 					
 				}
@@ -57,7 +57,7 @@ SEL_UNIT_TEST(dnn)
 
 struct ut_traits
 {
-	static constexpr size_t num_input_features = 10;
+	static constexpr size_t num_input_features = 6846;
 	static constexpr size_t num_output_features = 2;
 };
 
@@ -91,7 +91,8 @@ static bool file_exists(const char *filename)
 
 void run()
 {
-	const std::string onnx_filename = "./hearable.onnx";
+	const std::string onnx_filename = "./model_189.onnx";
+
 
 	auto onnx_file_found = file_exists(onnx_filename.c_str());
 	SEL_UNIT_TEST_ASSERT(onnx_file_found);
@@ -105,7 +106,7 @@ void run()
 
 		sel::eng6::proc::dnn<ut_traits::num_input_features, ut_traits::num_output_features> dnn(onnx_filename);
 
-		sel::eng6::Const input = input_a;
+        sel::eng6::proc::rand<ut_traits::num_input_features> input;
 		dnn.ConnectFrom(input);
 		dnn.freeze();
 

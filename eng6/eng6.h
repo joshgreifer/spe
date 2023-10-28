@@ -26,6 +26,7 @@
 
 #include "procs/window.h"
 
+#include "filter.h"
 #include "procs/fir_filt.h"
 #include "procs/iir_filt.h"
 #include "procs/lattice_filter.h"
@@ -45,3 +46,5 @@
 
 #include "xml_loader.h"
 #include "eng_traits.h"
+
+#include "juliusResampler.h"

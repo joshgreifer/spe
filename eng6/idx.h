@@ -28,6 +28,7 @@ namespace sel {
 		explicit idx(const size_t sz=SZ) : i(0) {}
 
 		operator size_t() const { return i; }
+        idx& operator=(const size_t& other) { i = other; make_modulo(); return *this; }
 		size_t operator++() { if (++i == SZ) i = 0; return i; }
 		size_t operator--() { if (--i < 0) i += SZ; return i; }
         size_t operator+=(size_t n) { i += n; make_modulo(); return i; }
@@ -50,6 +51,7 @@ namespace sel {
         void reset() { i = 0; }
 		constexpr size_t size() const { return SZ; }
 		explicit constexpr idx(const size_t sz=SZ)  { }
+        idx& operator=(const size_t& other) { i = other; make_modulo(); return *this; }
 		operator size_t() const { return i; }
 		size_t operator++() { ++i; make_modulo();  return i; }
 		size_t operator--() { --i; make_modulo(); return i; }
@@ -70,6 +72,7 @@ namespace sel {
 		explicit constexpr idx(const size_t sz=USHRT_MAX+1) : i(0)  {
 			//		printf("ushort idx\n");
 		}
+        idx& operator=(const size_t& other) { i = static_cast<unsigned short>(other); make_modulo(); return *this; }
 		operator size_t() const { return i; }
 		size_t operator++() { ++i; make_modulo();  return i; }
 		size_t operator--() { --i; make_modulo(); return i; }
@@ -89,6 +92,7 @@ namespace sel {
 		explicit constexpr idx(const size_t sz=UCHAR_MAX+1) : i(0) {
 			//		printf("uchar idx\n");
 		}
+        idx& operator=(const size_t& other) { i = static_cast<unsigned char>(other); make_modulo(); return *this; }
 		operator size_t() const { return i; }
 		size_t operator++() { ++i; make_modulo();  return i; }
 		size_t operator--() { --i; make_modulo(); return i; }
@@ -109,6 +113,7 @@ namespace sel {
 		explicit constexpr idx(const size_t sz) : SZ(sz), i(0) {
 			assert(sz != dynamic_size_v);
 		}
+        idx& operator=(const size_t& other) { i = other; make_modulo(); return *this; }
 		operator size_t() const { return i; }
 		size_t operator++() { if (++i == SZ) i = 0; return i; }
 		size_t operator--() { if (--i < 0) i += SZ; return i; }

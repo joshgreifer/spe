@@ -30,7 +30,7 @@
 
 template<unsigned M, unsigned N, unsigned B, unsigned A>
 struct SinCosSeries {
-   static double value() {
+   static constexpr double value() {
       return 1-(A*M_PI/B)*(A*M_PI/B)/M/(M+1)
                *SinCosSeries<M+2,N,B,A>::value();
    }
@@ -39,7 +39,7 @@ struct SinCosSeries {
 
 template<unsigned N, unsigned B, unsigned A>
 struct SinCosSeries<N,N,B,A> {
-   static double value() { return 1.; }
+   static constexpr double value() { return 1.; }
 };
 
 ////// template class Sin
@@ -50,13 +50,13 @@ struct Sin;
 
 template<unsigned B, unsigned A>
 struct Sin<B,A,float> {
-   static float value() {
+   static constexpr float value() {
       return (A*M_PI/B)*SinCosSeries<2,24,B,A>::value();
    }
 };
 template<unsigned B, unsigned A>
 struct Sin<B,A,double> {
-   static double value() {
+   static constexpr double value() {
       return (A*M_PI/B)*SinCosSeries<2,34,B,A>::value();
    }
 };

@@ -91,7 +91,7 @@ public:
 				throw std::runtime_error(*this);
 			}
 			*next_arg_l_delim = '\0'; // for strcat
-			*next_arg_r_delim = '\0'; // make macro_name into c string 
+			*next_arg_r_delim = '\0'; // make macro_name into c string
 			macro_name = next_arg_l_delim + 2; // strlen(ARG_L_DELIM)
 			while (*dstp = *srcp++)
 				dstp++;

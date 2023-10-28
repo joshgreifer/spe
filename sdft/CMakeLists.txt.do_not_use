@@ -1,0 +1,43 @@
+cmake_minimum_required(VERSION 3.20)
+#set(CMAKE_CUDA_COMPILER "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v10.2\\bin\\nvcc.exe")
+#set(CUDACXX "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v10.2\\bin\\nvcc.exe")
+# set the project name
+project(sdft LANGUAGES CUDA CXX)
+
+#set(VCPKG_TARGET_TRIPLET x64-linux)
+#set(CMAKE_TOOLCHAIN_FILE "/Users/josh/vcpkg/scripts/buildsystems/vcpkg.cmake" )
+
+find_package(FFTW3 CONFIG REQUIRED)
+
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+    MESSAGE("Using Clang compiler")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    MESSAGE("Using Gnu compiler")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+    MESSAGE("Using Intel compiler")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+    MESSAGE("Using Microsoft Visual Studio Compiler")
+
+endif()
+
+#if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+#    add_compile_options(-std:c++17 -bigobj)
+#elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+#    add_compile_options(-fvisibility=hidden -std=c++17 -Wno-parentheses -Wno-undefined-var-template)
+#else()
+#    #add_compile_options(-std=c++17)
+#endif()
+
+# add the executable
+set(CMAKE_CUDA_STANDARD 14)
+add_executable(sdft sdft.cpp gpu.cu)
+
+set_target_properties(sdft PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+set_property(TARGET sdft PROPERTY CXX_STANDARD 14)
+set_property(TARGET sdft PROPERTY CXX_STANDARD_REQUIRED ON)
+
+
+file(GLOB ARTEFACTS artefacts/*)
+file(COPY ${ARTEFACTS} DESTINATION .)
+
+target_link_libraries(sdft PRIVATE FFTW3::fftw3)

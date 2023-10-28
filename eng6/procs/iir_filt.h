@@ -10,11 +10,11 @@ namespace sel {
 		namespace proc {
 
 
-			class iir_filt : public  Processor1A1B<1, 1>, virtual public creatable<iir_filt>
+			template<size_t SZ>class iir_filt : public  Processor1A1B<SZ, SZ>
 			{
-				const size_t sz;
-				std::vector<samp_t> b_;
-				std::vector<samp_t> a_;
+				const size_t n_coeffs;
+				const std::vector<samp_t> b_;
+				const std::vector<samp_t> a_;
 				std::vector<samp_t> w_;
 
 				void check_coeffs() const
@@ -27,59 +27,68 @@ namespace sel {
 					
 				
 			public:
-				explicit iir_filt() : sz(0) {}
 
-				iir_filt(std::vector<samp_t>& b, std::vector<samp_t>& a) : 
-				sz(b.size()),  
-				b_(b),
-				a_(a), 
-				w_(sz)
+				iir_filt(std::vector<samp_t> b, std::vector<samp_t> a) :
+                        n_coeffs(b.size()),
+                        b_(b),
+                        a_(a),
+                        w_(n_coeffs)
 				{
 					check_coeffs();
 				}
 
 				iir_filt(std::initializer_list<samp_t> b, std::initializer_list<samp_t> a) :
-				sz(b.size()),  
-				b_(b),
-				a_(a), 
-				w_(sz)
+                        n_coeffs(b.size()),
+                        b_(b),
+                        a_(a),
+                        w_(n_coeffs)
 				{
 					check_coeffs();
 				}
 
+			    iir_filt(const BiquadCoeffs& coeffs) :  iir_filt(
+                        std::vector<double>(coeffs.b.begin(), coeffs.b.end()) ,
+                        std::vector<double>(coeffs.a.begin(), coeffs.a.end()))
+                        {
 
-				explicit iir_filt(params& args) : sz(0) {}
+                }
 
-				virtual const std::string type() const final { return "iir filter"; }
+                iir_filt operator+(const iir_filt& other) {
+                    return iir_filt(poly_multiply(b_, other.b_), poly_multiply(a_, other.a_));
+                }
 
-			
 				void process() final 
 				{
-					size_t i;
-					samp_t y = 0;
+					size_t j;
 
-					w_[0] = in[0];				// current input sample
+                    for (size_t i = 0; i < SZ; ++i) {
 
-					for ( i = 1; i < sz; ++i )	// input adder
-						w_[0] -= a_[i] * w_[i];
+                        samp_t y = 0;
 
-					for ( i = 0; i < sz ; ++i )	// output adder
-						y += b_[i] * w_[i];
+                        w_[0] = iir_filt<SZ>::in[i];				// current input sample
 
-					// now i == sz
-					for (--i; i != 0; --i )		// shift buf backwards
-						w_[i] = w_[i-1];
-					
-					out[0] =  y / a_[0];		// current output sample
+                        for (j = 1; j < n_coeffs; ++j )	// input adder
+                            w_[0] -= a_[j] * w_[j];
+
+                        for (j = 0; j < n_coeffs ; ++j )	// output adder
+                            y += b_[j] * w_[j];
+
+                        // now i == sz
+                        for (--j; j != 0; --j )		// shift buf backwards
+                            w_[j] = w_[j - 1];
+
+                        iir_filt<SZ>::out[i] =  y / a_[0];		// current output sample
+
+                    }
 
 				}	
 			};
 
-			struct preemphasis_filter : iir_filt
+			template<size_t SZ>struct preemphasis_filter : iir_filt<SZ>
 			{
 				// pre-emphasis filter
 				explicit preemphasis_filter(double alpha) :
-				iir_filt({ 1, 0}, { 1.0, alpha }) {}
+				iir_filt<SZ>({ 1, 0}, { 1.0, alpha }) {}
 				
 			};
 			// See Hal Chamberlin's &quot;Musical Applications of Microprocessors, Page 585 ff &quot; for a discussion and explanation.
@@ -91,7 +100,7 @@ namespace sel {
 			//a = [ 1 K-1 ]
 			//
 
-			template<size_t Fc, size_t Fs>struct lp_filter_6dB : iir_filt
+			template<size_t SZ, size_t Fc, size_t Fs>struct lp_filter_6dB : iir_filt<SZ>
 			{
 				static double k()
 				{
@@ -99,13 +108,13 @@ namespace sel {
 				}
 				// lowpass  filter
 				explicit lp_filter_6dB() :
-				iir_filt(
+				iir_filt<SZ>(
 					{ k() / 2.0, k() / 2.0 }, 
 					{ 1.0, k() - 1.0 })  {}
 				
 			};
 
-			template<size_t Fc, size_t Fs>struct hp_filter_6dB : iir_filt
+			template<size_t SZ, size_t Fc, size_t Fs>struct hp_filter_6dB : iir_filt<SZ>
 			{
 				static double k()
 				{
@@ -113,7 +122,7 @@ namespace sel {
 				}
 				// highpass  filter
 				explicit hp_filter_6dB() :
-				iir_filt(
+				iir_filt<SZ>(
 					{ 1.0 - k() / 2.0, k() / 2.0 - 1.0 }, 
 					{ 1.0, k() - 1.0 })  {}
 				
@@ -146,24 +155,26 @@ std::array<samp_t, ut_traits::signal_length> matlab_results = { {
 
 void run()
 {
-	sel::eng6::proc::rand<1> rng;
-	sel::eng6::proc::iir_filt filt1({1, 0}, { 1, 0.97});
-	sel::eng6::proc::preemphasis_filter filt2(0.97);
+	sel::eng6::proc::rand<ut_traits::signal_length> rng;
+	sel::eng6::proc::iir_filt<ut_traits::signal_length> filt1({1, 0}, { 1, 0.97});
+	sel::eng6::proc::preemphasis_filter<ut_traits::signal_length> filt2(0.97);
 	rng.ConnectTo(filt1);
 	rng.ConnectTo(filt2);
 	rng.freeze();
 	filt1.freeze();
 	filt2.freeze();
 
-	for (size_t iter = 0; iter < ut_traits::signal_length; ++iter)
-	{
-		rng.process();
-		filt1.process();
-		SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(filt1.out[0], matlab_results[iter])
-		filt2.process();
-		SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(filt2.out[0], matlab_results[iter])
 
-	}
+    rng.process();
+
+    filt1.process();
+    for (size_t i = 0; i < ut_traits::signal_length; ++i)
+        SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(filt1.out[i], matlab_results[i]);
+    filt2.process();
+    for (size_t i = 0; i < ut_traits::signal_length; ++i)
+        SEL_UNIT_TEST_ASSERT_ALMOST_EQUAL(filt2.out[i], matlab_results[i]);
+
+
 
 	
 }
